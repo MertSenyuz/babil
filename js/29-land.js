@@ -93,9 +93,7 @@ function renderLandLayer(animId){
       el.style.left = b.x + 'px';
       el.style.top  = (b.y + 6) + 'px';
       el.innerHTML = `<svg class="lm-bld-in" width="64" height="70" viewBox="0 0 64 70" aria-hidden="true">
-          <ellipse cx="32" cy="62" rx="26" ry="7" fill="#000" opacity=".3"/>
-          <ellipse cx="32" cy="59" rx="24" ry="7.5" fill="#c8a848" stroke="#8a6a2a" stroke-width="2.5"/>
-          <ellipse cx="32" cy="57.5" rx="17" ry="4" fill="#e0cc88" opacity=".7"/>
+          <ellipse cx="32" cy="55" rx="18" ry="4" fill="#000" opacity=".25"/>
           ${SA_ART[si.id] ? `<svg class="sa" x="7" y="5" width="50" height="50" viewBox="0 0 80 80">${SA_ART[si.id]}</svg>` : `<text x="32" y="52" text-anchor="middle" font-size="40">${si.icon}</text>`}
         </svg>`;
     } else {
