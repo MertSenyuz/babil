@@ -79,6 +79,9 @@ const OL = {
     ol_name_taken:['Bu kullanıcı adı zaten alınmış!','This username is already taken!'],
     ol_conflict:['☁️ "{0}" adı çevrimiçi başka bir oyuncuya ait — ilerlemen yalnızca bu cihazda saklanacak.','☁️ "{0}" is taken online by another player — your progress stays on this device only.'],
     ol_restored:['☁️ Bulut kaydın yüklendi!','☁️ Cloud save restored!'],
+    ol_mlb_title:['🏆 Liderlik','🏆 Leaders'],
+    ol_mlb_aria:['Liderlik','Leaderboard'],
+    ol_mlb_more:['Tümünü gör →','See all →'],
   };
   const esc = s=>s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   Object.entries(M).forEach(([k,[tr,en]])=>{
@@ -879,6 +882,84 @@ setLanguage = function(){
   if(active==='profileScreen') olStatus();
   return res;
 };
+
+// ── Harita yanı liderlik paneli: ilk 10, harita açıkken 30 sn'de bir yenilenir ──
+// Görünürlük CSS'te: body.map-on + geniş ekran (mobilde gizli). Dar ekranda istek de atılmaz.
+const MLB_CACHE = 'babil_mlb_cache';
+const MLB_EVERY = 30000;
+const _mlbWide = window.matchMedia('(min-width:920px) and (min-height:420px)');
+function mlbVisible(){ return document.body.classList.contains('map-on') && _mlbWide.matches && document.visibilityState!=='hidden'; }
+
+function mlbRender(rows, me, note){
+  const list=document.getElementById('mapLbList');
+  if(!list) return;
+  const myId=CURRENT_USER && CURRENT_USER.sbId;
+  const isMe=r=>myId!=null && String(r.user_id)===String(myId);
+  const row=(r, rank)=>`<div class="map-lb-row${isMe(r) ? ' me' : ''}${rank<=3 ? ' top' : ''}">
+    <span class="map-lb-rank">${rank<=3 ? ['🥇','🥈','🥉'][rank-1] : rank}</span>
+    <span class="map-lb-name">${olEsc(r.username)}</span>
+    <span class="map-lb-stars">⭐ ${olNum(r.total_stars)}</span>
+  </div>`;
+  rows=rows||[];
+  let html=rows.map((r,i)=>row(r, i+1)).join('');
+  if(me && me.rank>rows.length) html+=`<div class="map-lb-gap">⋮</div>`+row(me.row, me.rank);   // ilk 10 dışındaysan altta
+  list.innerHTML=(note ? `<div class="map-lb-note">${olEsc(note)}</div>` : '')+html;
+}
+
+async function mlbLoad(){
+  if(!mlbVisible()) return;
+  let cache=null;
+  try{ cache=JSON.parse(localStorage.getItem(MLB_CACHE)||'null'); }catch(e){}
+  const fallback=key=>mlbRender(cache && cache.rows, cache && cache.me, cache ? '' : t(key));
+  if(!olOnline()) return fallback('ol_lb_nodata');
+  try{
+    const sb=await olClient();
+    if(!sb) return fallback('ol_lb_nodata');
+    const rows=await olQ(sb.from('leaderboard').select('user_id,username,total_stars,total_score')
+      .order('total_stars', {ascending:false}).order('total_score', {ascending:false}).limit(10));
+    let me=null;
+    const id=CURRENT_USER && CURRENT_USER.sbId;
+    if(id!=null && !rows.some(r=>String(r.user_id)===String(id))){
+      const mine=await olQ(sb.from('leaderboard').select('user_id,username,total_stars,total_score').eq('user_id', id).limit(1));
+      if(mine && mine[0]){
+        const above=await olQ(sb.from('leaderboard').select('user_id', {count:'exact', head:true}).gt('total_stars', mine[0].total_stars||0));
+        me={rank:(above||0)+1, row:mine[0]};
+      }
+    }
+    try{ localStorage.setItem(MLB_CACHE, JSON.stringify({rows, me})); }catch(e){}
+    if(mlbVisible()) mlbRender(rows, me, rows.length ? '' : t('ol_lb_empty'));
+  }catch(e){
+    olWarn('map-leaderboard', e);
+    fallback('ol_lb_nodata');
+  }
+}
+
+let _mlbTimer=null;
+function mlbUpdate(){
+  const on=mlbVisible();
+  if(on && !_mlbTimer){ mlbLoad(); _mlbTimer=setInterval(mlbLoad, MLB_EVERY); }
+  else if(!on && _mlbTimer){ clearInterval(_mlbTimer); _mlbTimer=null; }
+}
+
+const _mlbOrigShowScreen = showScreen;
+showScreen = function(id){
+  const res=_mlbOrigShowScreen.apply(this, arguments);
+  document.body.classList.toggle('map-on', id==='mapScreen');
+  mlbUpdate();
+  return res;
+};
+(_mlbWide.addEventListener ? _mlbWide.addEventListener('change', mlbUpdate) : _mlbWide.addListener(mlbUpdate));
+document.addEventListener('visibilitychange', mlbUpdate);
+window.addEventListener('online', ()=>{ if(mlbVisible()) mlbLoad(); });
+// Bölüm sonrası senkron bitince haritaya dönüldüğünde güncel sıra görünsün
+const _mlbOrigSyncRun = olSyncRun;
+olSyncRun = async function(){
+  const res=await _mlbOrigSyncRun.apply(this, arguments);
+  if(mlbVisible()) mlbLoad();
+  return res;
+};
+document.body.classList.toggle('map-on', !!document.getElementById('mapScreen')?.classList.contains('active'));
+mlbUpdate();
 
 // initAuth() otomatik giriş yaptıysa (29-land.js) bu dosyadan önce çalışmıştır → burada başlat
 if(CURRENT_USER){
