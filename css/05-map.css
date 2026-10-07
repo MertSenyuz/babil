@@ -94,6 +94,8 @@
 .mpin.locked .mpin-dot{
   background:#2a1850;box-shadow:none;animation:none;
 }
+/* Kartın altındaki direk ve nokta gizli: yer tutmaya devam ederler ki kartın harita konumu değişmesin */
+.mpin-pole,.mpin-dot{visibility:hidden;animation:none;box-shadow:none;}
 @keyframes pinPulse{
   0%,100%{transform:scale(1);opacity:1;}
   50%{transform:scale(1.4);opacity:.7;}
