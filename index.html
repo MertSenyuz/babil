@@ -31,6 +31,9 @@
 <link rel="stylesheet" href="css/21-bazaar.css">
 <link rel="stylesheet" href="css/22-difficulty-obstacles.css">
 <link rel="stylesheet" href="css/23-auto-hint.css">
+<link rel="stylesheet" href="css/24-online.css">
+<!-- Supabase istemcisi: async yüklenir, internet yoksa oyun yerel kayıtla çalışmaya devam eder -->
+<script async src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <div id="stars"></div>
@@ -106,8 +109,36 @@
     <div class="profile-name" id="profileName" data-no-i18n>—</div>
     <div class="profile-since" id="profileSince">Katılım: —</div>
     <div class="profile-level-badge" id="profileLevelBadge">⭐ Seviye 1</div>
+    <div class="sb-status" id="sbStatus"></div>
   </div>
   <div class="profile-body">
+    <div class="pf-tabs">
+      <button class="pf-tab active" data-pf="me" onclick="pfSetTab('me')">👤 Profil</button>
+      <button class="pf-tab" data-pf="friends" onclick="pfSetTab('friends')">👥 Arkadaşlar<span class="pf-badge"></span></button>
+    </div>
+    <!-- Arkadaşlar sekmesi -->
+    <div id="friendsPanel" class="fr-panel" style="display:none;">
+      <div class="profile-section">
+        <div class="profile-sec-head">➕ ARKADAŞ EKLE</div>
+        <div class="fr-add" id="frAddRow">
+          <input class="auth-input" id="frAddName" type="text" placeholder="Kullanıcı adı..." maxlength="20" autocomplete="off" onkeydown="if(event.key==='Enter')frAdd()"/>
+          <button class="fr-add-btn" onclick="frAdd()">EKLE</button>
+        </div>
+        <div class="fr-msg" id="frMsg"></div>
+      </div>
+      <div class="profile-section" id="frInSec" style="display:none;">
+        <div class="profile-sec-head">📩 GELEN İSTEKLER</div>
+        <div class="fr-list" id="frIn"></div>
+      </div>
+      <div class="profile-section" id="frOutSec" style="display:none;">
+        <div class="profile-sec-head">📤 GİDEN İSTEKLER</div>
+        <div class="fr-list" id="frOut"></div>
+      </div>
+      <div class="profile-section">
+        <div class="profile-sec-head">👥 ARKADAŞLARIM <span id="frCount" data-no-i18n></span></div>
+        <div class="fr-list" id="frList"></div>
+      </div>
+    </div>
     <!-- İstatistikler -->
     <div class="profile-section">
       <div class="profile-sec-head">📊 İSTATİSTİKLER</div>
@@ -160,6 +191,26 @@
       <div class="nf-actions"><button class="lm-btn lm-btn-gold" onclick="nfTest()">🔔 Bildirimleri Test Et</button></div>
     </div>
   </div>
+</div>
+
+<!-- ═══ LİDERLİK TABLOSU ═══ -->
+<div id="leaderboardScreen" class="screen">
+  <div class="lb-hero">
+    <button class="profile-back" onclick="showScreen('menuScreen')">← Menü</button>
+    <button class="lb-refresh" id="lbRefresh" onclick="lbRefresh()" aria-label="Yenile" title="Yenile">⟳</button>
+    <div class="lb-crown">🏆</div>
+    <h2 class="lb-title">LİDERLİK TABLOSU</h2>
+    <div class="lb-subtitle">Babil'in en büyük mimarları</div>
+    <div class="lb-tabs">
+      <button class="lb-tab" data-lb="week" onclick="lbSetTab('week')">Haftalık</button>
+      <button class="lb-tab active" data-lb="all" onclick="lbSetTab('all')">Tüm Zamanlar</button>
+    </div>
+  </div>
+  <div class="lb-scroll">
+    <div class="lb-podium" id="lbPodium"></div>
+    <div class="lb-list" id="lbList"></div>
+  </div>
+  <div class="lb-me" id="lbMe"></div>
 </div>
 
 <!-- ═══ MAĞAZA EKRANI ═══ -->
@@ -391,8 +442,9 @@
   <div class="menu-btns">
     <button class="btn" onclick="showMapScreen()">🗺 ŞEHİR HARİTASI</button>
     <button class="btn secondary" onclick="showShopScreen()">🛒 MAĞAZA</button>
+    <button class="btn secondary" onclick="showLeaderboardScreen()">🏆 LİDERLİK TABLOSU</button>
     <button class="btn secondary" onclick="showCityScreen()">📋 YAPI LİSTESİ</button>
-    <button class="btn secondary" onclick="showProfileScreen()">👤 PROFİLİM</button>
+    <button class="btn secondary" onclick="showProfileScreen()">👤 PROFİLİM<span class="pf-badge"></span></button>
     <button class="btn secondary" onclick="showHowto()">NASIL OYNANIR</button>
     <button class="btn secondary" style="margin-top:4px;color:#ff8888;border-color:rgba(255,100,100,.3);" onclick="doLogout()">🚪 Çıkış Yap</button>
   </div>
@@ -3011,5 +3063,6 @@
 <script src="js/40-swipe.js"></script>
 <script src="js/41-difficulty-mechanics.js"></script>
 <script src="js/42-auto-hint.js"></script>
+<script src="js/43-online.js"></script>
 </body>
 </html>
