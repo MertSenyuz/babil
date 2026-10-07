@@ -469,9 +469,15 @@ body{width:100%;height:100%;height:-webkit-fill-available;overflow:hidden;backgr
 
 /* ═══ HARİTA EKRANI ═══ */
 #mapScreen{z-index:10;overflow:hidden;}
-#mapCanvas{flex:1;overflow:hidden;position:relative;cursor:grab;user-select:none;background:#06030f;}
+#mapCanvas{flex:1;overflow:hidden;position:relative;cursor:grab;user-select:none;background:#06030f;touch-action:none;}
 #mapCanvas.dragging{cursor:grabbing;}
-#mapInner{position:absolute;top:0;left:0;width:2000px;height:2000px;will-change:transform;transform-origin:0 0;}
+#mapInner{position:absolute;top:0;left:0;width:2000px;height:2000px;will-change:transform;transform-origin:0 0;
+  transform:translateZ(0);backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+/* Sürükleme performansı: .map-moving yalnızca parmak/fare gerçekten kayınca eklenir (dokunma/tıklama etkilenmez) */
+#mapCanvas.map-moving .fog-cloud,#mapCanvas.map-moving .fog-shine,#mapCanvas.map-moving .mpin-dot{animation-play-state:paused;}
+#mapCanvas.map-moving .mpin,#mapCanvas.map-moving .mpin-card,#mapCanvas.map-moving .map-item-marker,#mapCanvas.map-moving .lm-bld{pointer-events:none;transition:none;}
+/* Ekran dışındaki sis bölgeleri çizilmez (applyMapTr içinde hesaplanır) */
+.fog-zone.fz-off{display:none;}
 #mapTerrainSvg{display:block;width:2000px;height:2000px;position:absolute;top:0;left:0;}
 
 /* ── GELİŞMİŞ PIN KARTLARI ── */
@@ -493,7 +499,7 @@ body{width:100%;height:100%;height:-webkit-fill-available;overflow:hidden;backgr
   text-align:center;
   min-width:96px;max-width:118px;
   box-shadow:0 6px 24px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.04),inset 0 1px 0 rgba(255,255,255,.06);
-  -webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  /* backdrop-filter kaldırıldı: zemin %95 opak, bulanıklık görünmüyordu ama her karede yeniden hesaplanıyordu */
   transition:border-color .25s,box-shadow .25s,transform .18s;
   position:relative;overflow:hidden;
 }
@@ -769,7 +775,8 @@ body{width:100%;height:100%;height:-webkit-fill-available;overflow:hidden;backgr
   transition:opacity 2s ease;
   border-radius:20px;overflow:hidden;
 }
-.fog-zone.revealed{opacity:0!important;pointer-events:none;}
+.fog-zone.revealed{opacity:0!important;pointer-events:none;visibility:hidden;transition:opacity 2s ease,visibility 0s 2s;}
+.fog-zone.revealed .fog-cloud,.fog-zone.revealed .fog-shine{animation-play-state:paused;}
 
 /* Zemin */
 .fog-base{
@@ -2491,6 +2498,86 @@ body{width:100%;height:100%;height:-webkit-fill-available;overflow:hidden;backgr
 @media (prefers-reduced-motion:reduce){
   .sa *,.bz-lamp,.shop-item.sa-bought,.shop-item.sa-bought *,.map-item-marker.mi-new .sa-map,.map-item-marker.mi-new::after{animation:none!important;}
 }
+
+/* ═══ ZORLUK: yeni engel taşları ═══ */
+.cell.hd-ob{overflow:hidden;cursor:not-allowed;}
+.cell.hd-ob .hd-g{position:relative;z-index:0;line-height:1;display:inline-block;}
+.hd-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;}
+.cell.hd-lock{filter:saturate(.55);}
+.cell.hd-lock .hd-lock-ic{inset:auto 3% 3% auto;width:46%;height:52%;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6));}
+.cell.hd-cage{box-shadow:inset 0 0 0 2px #2e3239,inset 0 0 12px rgba(0,0,0,.6);}
+.cell.hd-honey{border-color:#e0a312;box-shadow:inset 0 0 14px rgba(255,190,30,.55),0 0 6px rgba(255,190,30,.4);}
+.cell.hd-honey .hd-g{filter:sepia(.35);}
+.cell.hd-pillar .hd-g{transform:translateY(-26%) scale(.78);}
+.cell.hd-carbon{background:radial-gradient(circle at 35% 30%,#1d1d21,#060607 70%);border:2px solid #000;
+  box-shadow:inset 0 2px 4px rgba(255,255,255,.06),inset 0 -3px 6px rgba(0,0,0,.8);cursor:not-allowed;}
+.goal-item .hd-goal-ic{font-size:14px;text-shadow:none;}
+.ghp-gem.hd-ghp-ic{background:rgba(255,255,255,.06);font-size:16px;}
+.goal-item.hd-cons{border-style:dashed;}
+.goal-item.hd-cons.hd-fail{border-color:#ff5a5a;background:rgba(255,60,60,.14);}
+.goal-item.hd-cons.hd-fail .gi-count{color:#ff6b6b;text-decoration:line-through;}
+.hd-fx{position:fixed;pointer-events:none;z-index:9990;}
+/* Yükselen su */
+.cell.hd-water{cursor:not-allowed;}
+.hd-wl{position:absolute;inset:-3px;border-radius:inherit;pointer-events:none;z-index:2;
+  background:linear-gradient(180deg,rgba(90,170,255,.28),rgba(20,90,210,.55));box-shadow:inset 0 0 10px rgba(150,210,255,.35);}
+.cell.hd-water-top .hd-wl{background:linear-gradient(180deg,rgba(150,215,255,.12) 0%,rgba(90,170,255,.35) 30%,rgba(20,90,210,.58));
+  animation:hdWave 2.2s ease-in-out infinite;}
+.cell.hd-water-top .hd-wl::before{content:'';position:absolute;left:0;right:0;top:-2px;height:5px;border-radius:50%;background:rgba(200,235,255,.7);filter:blur(1px);}
+@keyframes hdWave{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+/* Karanlık mod: ışık kayınca yumuşak geçiş */
+#board .cell{transition:transform .12s,box-shadow .12s,filter .4s,background-color .4s;}
+#board .cell.hd-dim{filter:brightness(.28) saturate(.4);}
+#board .cell.hd-dark{filter:none;background:#07040f!important;border-color:rgba(255,255,255,.05)!important;
+  color:transparent!important;text-shadow:none!important;box-shadow:none!important;}
+#board .cell.hd-dark>*:not(.hd-bw){visibility:hidden;}
+#board .cell.hd-bomb{filter:none;}
+/* Düşen bomba */
+.cell.hd-bomb{animation:hdBombBlink .5s ease-in-out infinite alternate;z-index:3;}
+@keyframes hdBombBlink{from{box-shadow:0 0 0 2px #ff2a2a,0 0 8px #ff2a2a}to{box-shadow:0 0 0 3px #ff2a2a,0 0 22px #ff2a2a;background-color:rgba(255,40,40,.35)}}
+.hd-bw{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:4;font-style:normal;
+  font:900 1.15em 'Cinzel',serif;color:#fff;text-shadow:0 0 6px #ff0000,0 0 2px #000;
+  background:radial-gradient(circle,rgba(255,40,40,.6),transparent 72%);pointer-events:none;}
+/* Karışan tahta + bomba sarsıntısı */
+#board.hd-shuffling{animation:hdShuffle 1s ease-in-out;}
+@keyframes hdShuffle{0%,100%{transform:none;filter:none}25%{transform:rotate(-3deg) scale(.94);filter:blur(1px)}
+  50%{transform:rotate(3deg) scale(.9);filter:blur(3px) brightness(1.3)}75%{transform:rotate(-2deg) scale(.96);filter:blur(1px)}}
+#board.hd-quake{animation:bstShake .4s linear;}
+.hd-banner{position:fixed;transform:translate(-50%,-50%);z-index:9991;pointer-events:none;font:900 19px 'Cinzel',serif;color:#fff;
+  padding:10px 18px;border-radius:14px;background:rgba(10,4,26,.88);border:2px solid var(--gold);box-shadow:0 0 24px rgba(245,200,66,.5);
+  white-space:nowrap;animation:hdBanner 1.3s ease both;}
+@keyframes hdBanner{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.06)}
+  25%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-70%)}}
+@media (prefers-reduced-motion:reduce){ #board.hd-shuffling,.cell.hd-water-top .hd-wl,.cell.hd-bomb,.hd-banner{animation:none!important;} }
+
+/* ═══ OTOMATİK İPUCU ═══ */
+#board .cell{transition:transform .12s,box-shadow .12s,filter .4s,background-color .4s,opacity .35s;}
+#board.ah-on .cell:not(.ah-cell){opacity:.7;}
+#board .cell.ah-cell{z-index:6;border:2px solid #f5c842;box-shadow:0 0 20px #f5c842,inset 0 0 8px rgba(245,200,66,.45);}
+#board .cell.ah-strong{animation:ahPulse .66s ease-in-out 3;}
+@keyframes ahPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+#board .cell.ah-soft{animation:ahSoft 1.8s ease-in-out infinite;}
+@keyframes ahSoft{0%,100%{transform:scale(1);box-shadow:0 0 10px rgba(245,200,66,.55)}50%{transform:scale(1.06);box-shadow:0 0 22px #f5c842}}
+.ah-arrow{position:absolute;width:42%;height:42%;z-index:7;pointer-events:none;font-style:normal;
+  filter:drop-shadow(0 0 2px rgba(0,0,0,.9)) drop-shadow(0 0 5px rgba(245,200,66,.8));animation:ahArrow .8s ease-in-out infinite;}
+.ah-arrow svg{width:100%;height:100%;display:block;}
+.ah-right{right:-12%;top:29%;--rot:0deg;--dx:1;--dy:0;}
+.ah-left{left:-12%;top:29%;--rot:180deg;--dx:-1;--dy:0;}
+.ah-down{bottom:-12%;left:29%;--rot:90deg;--dx:0;--dy:1;}
+.ah-up{top:-12%;left:29%;--rot:-90deg;--dx:0;--dy:-1;}
+@keyframes ahArrow{0%,100%{transform:translate(calc(var(--dx)*-3px),calc(var(--dy)*-3px)) rotate(var(--rot));opacity:.7}
+  50%{transform:translate(calc(var(--dx)*4px),calc(var(--dy)*4px)) rotate(var(--rot));opacity:1}}
+.ah-spark{position:fixed;pointer-events:none;z-index:9989;border-radius:50%;
+  background:radial-gradient(circle,#fff6c8,#f5c842 60%,rgba(245,200,66,0));box-shadow:0 0 6px #f5c842;}
+.ah-tip{position:fixed;transform:translate(-50%,-130%);z-index:9992;pointer-events:none;font:800 13px 'Cinzel',serif;color:#1a0f00;
+  background:linear-gradient(135deg,#ffe08a,#f5c842);padding:5px 10px;border-radius:10px;white-space:nowrap;
+  box-shadow:0 4px 14px rgba(0,0,0,.5),0 0 12px rgba(245,200,66,.6);animation:ahTip 1.5s ease both;}
+.ah-tip::after{content:'';position:absolute;left:50%;bottom:-5px;margin-left:-5px;border:5px solid transparent;border-bottom:0;border-top-color:#f5c842;}
+@keyframes ahTip{0%{opacity:0;transform:translate(-50%,-100%) scale(.8)}15%{opacity:1;transform:translate(-50%,-130%) scale(1)}
+  80%{opacity:1}100%{opacity:0;transform:translate(-50%,-150%)}}
+.goal-item.ah-goal{animation:ahGoal 1.2s ease-in-out infinite;}
+@keyframes ahGoal{0%,100%{box-shadow:0 0 0 rgba(245,200,66,0)}50%{box-shadow:0 0 14px rgba(245,200,66,.75);border-color:#f5c842}}
+@media (prefers-reduced-motion:reduce){ #board .cell.ah-strong,#board .cell.ah-soft,.ah-arrow,.goal-item.ah-goal,.ah-tip{animation:none!important;} }
 </style>
 </head>
 <body>
@@ -5205,13 +5292,13 @@ body{width:100%;height:100%;height:-webkit-fill-available;overflow:hidden;backgr
             <div class="tw-map"></div>
             <div class="tw-river"></div>
             <div class="tw-fog"></div>
-            <div class="tw-fog-req">⭐ 6 yıldız gerek</div>
+            <div class="tw-fog-req">🔒 Önce Asma Bahçeler</div>
             <div class="tw-pin on" style="left:26%;top:58%;"><i>🗼</i><small>BABİL KULESİ</small></div>
             <div class="tw-pin on" style="left:50%;top:30%;"><i>🌿</i><small>ASMA BAHÇELER</small></div>
             <div class="tw-pin lock" style="left:78%;top:38%;"><i>🚪</i><small>🔒 KİLİTLİ</small></div>
           </div>
           <div class="tw-title">Şehir Haritası</div>
-          <div class="tw-desc">Haritada her yapının kendi bölümleri var. Her bölümden <b>3 yıldıza</b> kadar kazan; yıldızlar biriktikçe <b>sis dağılır</b> ve yeni yapıların kilidi açılır.</div>
+          <div class="tw-desc">Haritada her yapının kendi bölümleri var. Her bölümden <b>3 yıldıza</b> kadar kazan. Bir yapının <b>tüm bölümlerini bitirince</b> sis dağılır ve <b>sıradaki yapının</b> kilidi açılır.</div>
         </div>
 
         <!-- 5. Mağaza -->
@@ -6336,7 +6423,7 @@ const BUILDINGS = [
 // MEDENİYETLER — MEZOPOTAMYA TARİH YOLCULUĞU
 // Babil (M.Ö. 600) → Pers → Büyük İskender → Part → Sasani → İslam'ın Yükselişi → Abbasi → Moğol → Osmanlı (M.S. 1918)
 // Hepsi aynı Mezopotamya haritasında geçer; dönem değiştikçe yapılar, tema rengi ve dönem yazısı güncellenir.
-// Bir medeniyetin tüm bölümleri bitince sıradaki açılır. Yapı kilitleri medeniyet içi yıldızlara bakar.
+// Bir medeniyetin tüm bölümleri bitince sıradaki açılır. Yapılar sırayla açılır: her yapı bir öncekinin tüm bölümleri bitince (isBuildingUnlocked).
 // Zorluk: her medeniyette hamle azalır, hedefler çarpanla büyür (Babil bölümleri eski kayıtlar için aynen korunur).
 // ══════════════════════════════════════════════
 const CIVILIZATIONS = [
@@ -6977,6 +7064,8 @@ CIVILIZATIONS.forEach(civ=>{
       history:d.h, en:d.en});
   });
 });
+// Sıralı açılma: her yapı bir öncekinin (medeniyetin ilk yapısı için önceki medeniyetin son yapısının) bitmesini bekler
+BUILDINGS.forEach((b,i)=>{ b.unlockBuilding = i>0 ? i-1 : null; });
 
 // ── Medeniyet / ilerleme yardımcıları ──
 function civOf(idx){ return (BUILDINGS[idx] && BUILDINGS[idx].civ) || 0; }
@@ -6987,17 +7076,27 @@ function civStars(c){ return civBuildingIdx(c).reduce((a,i)=>a+buildingStars(i),
 function isBuildingComplete(idx){ const bp=G.buildingProgress[idx]; return !!bp && BUILDINGS[idx].levels.every((_,l)=>(bp.stars[l]||0)>0); }
 function isCivComplete(c){ return civBuildingIdx(c).every(isBuildingComplete); }
 function isCivUnlocked(c){ return c<=0 || isCivComplete(c-1); }
+// Bir yapı, unlockBuilding'deki yapının tüm bölümleri (en az 1 yıldızla) bitince açılır.
+// Eski kayıtlar: yıldız sistemiyle açılıp oynanmaya başlanmış yapı açık kalır (ilerleme kaybolmasın).
 function isBuildingUnlocked(idx){
   const b=BUILDINGS[idx];
-  return !!b && isCivUnlocked(b.civ||0) && civStars(b.civ||0) >= b.unlockStars;
+  if(!b || !isCivUnlocked(b.civ||0)) return false;
+  return b.unlockBuilding==null || isBuildingComplete(b.unlockBuilding) || buildingStars(idx)>0;
+}
+// Kilitli yapı için önceki yapının ilerlemesi: {prev, done, n}
+function buildingLockProgress(idx){
+  const p=BUILDINGS[idx] && BUILDINGS[idx].unlockBuilding;
+  if(p==null) return null;
+  const bp=G.buildingProgress[p], n=BUILDINGS[p].levels.length;
+  return {prev:BUILDINGS[p], done:bp ? bp.stars.filter(s=>s>0).length : 0, n};
 }
 function highestUnlockedCiv(){ let c=0; while(c+1<CIVILIZATIONS.length && isCivUnlocked(c+1)) c++; return c; }
 // Kilitli yapı için kullanıcıya gösterilecek neden
 function buildingLockMsg(idx){
   const b=BUILDINGS[idx], c=b.civ||0;
   if(!isCivUnlocked(c)) return `🔒 Önce ${CIVILIZATIONS[c-1].name} medeniyetini tamamla`;
-  const need=b.unlockStars-civStars(c);
-  return `🔒 ${b.unlockStars} yıldız gerekli` + (need>0?` (${need} ⭐ daha)`:'');
+  const lp=buildingLockProgress(idx);
+  return lp ? `🔒 Önce ${lp.prev.name} bitmeli (${lp.done}/${lp.n} bölüm)` : '🔒 Kilitli';
 }
 // Eski kayıtlar: yapı listesi ve bölüm dizileri yeni uzunluklara tamamlanır (yıldızlar korunur)
 function ensureProgress(){
@@ -7012,10 +7111,12 @@ function fmtYear(y){ return y<0 ? `M.Ö. ${-y}` : `M.S. ${y}`; }
 
 // ── Engel taşları: "#sand:2", "#marble:3", "#ice:gemX" — sabit durur, eşleşmez, yer değiştirmez ──
 function isObstacle(g){ return typeof g==='string' && g.charCodeAt(0)===35; }
-function obstacleInfo(g){ const [type,val]=g.slice(1).split(':'); return {type, val}; }
-function obstacleHit(r,c,full){
+function obstacleInfo(g){ const [type,val,gem]=g.slice(1).split(':'); return {type, val, gem}; }
+// h: {direct, below, side} — vuruşun nereden geldiği (yeni engeller için; eskiler her vuruşu sayar)
+function obstacleHit(r,c,full,h){
   const g=G.board[r][c];
   if(!isObstacle(g)) return;
+  if(hdObstacleHit(r,c,full,h||{direct:true})) return;    // kilit/kafes/bal/sütun/karbon
   const {type,val}=obstacleInfo(g);
   if(type==='ice'){ G.board[r][c]=val; return; }          // buz çözülür, içindeki taş kalır
   const hp=full ? 0 : (+val-1);
@@ -7023,17 +7124,19 @@ function obstacleHit(r,c,full){
 }
 // Temizlenecek hücreler: taşlar silinir, engeller vurulur; silinen taşın 4 komşusundaki engeller de 1 vuruş alır
 function boardClearCells(cells, killSet){
-  const hits=new Set();
+  const hits=new Map();   // hücre → {direct, below, side}; bir temizlemede her engel en fazla 1 vuruş alır
+  const hit=(i,k)=>{ const h=hits.get(i)||{}; h[k]=true; hits.set(i,h); };
   cells.forEach(({r,c})=>{
     const g=G.board[r] && G.board[r][c];
-    if(isObstacle(g)){ hits.add(r*BS+c); return; }
+    if(isObstacle(g)){ hit(r*BS+c,'direct'); return; }
     [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dr,dc])=>{
-      const rr=r+dr, cc=c+dc;
-      if(rr>=0&&cc>=0&&rr<BS&&cc<BS&&isObstacle(G.board[rr][cc])) hits.add(rr*BS+cc);
+      const rr=r+dr, cc=c+dc;   // dr=-1 → engel bu hücrenin üstünde, yani patlama engelin ALTINDA
+      if(rr>=0&&cc>=0&&rr<BS&&cc<BS&&isObstacle(G.board[rr][cc])) hit(rr*BS+cc, dr===-1?'below':'side');
     });
   });
   cells.forEach(({r,c})=>{ if(G.board[r] && !isObstacle(G.board[r][c])) G.board[r][c]=null; });
-  hits.forEach(i=>obstacleHit((i/BS)|0, i%BS, killSet && killSet.has(i)));
+  hits.forEach((h,i)=>obstacleHit((i/BS)|0, i%BS, killSet && killSet.has(i), h));
+  G._hdSuper=null; G._hdSuperAll=false;
   if(hits.size) SFX.select?.();
 }
 // Bölümün engellerini yerleştir (üst iki satır boş bırakılır)
@@ -7055,6 +7158,258 @@ function spawnGem(){
   const g=randomGem(), sp=G.civ && G.civ.special;
   return (sp && G.gameActive!==undefined && Math.random()<(G.civ.specialP||0)) ? g+'_'+sp : g;
 }
+
+// ══════════════════════════════════════════════
+// ZORLUK: YENİ ENGEL TAŞLARI
+// Mevcut engellerle aynı biçimde metin olarak saklanır ('#' → isObstacle: eşleşmez, takas edilmez):
+//   '#lock:gem3'      Kilitli taş     — yanında 1 patlama kilidi açar
+//   '#cage:2:gem3'    Demir parmaklık — 2 vuruş (1. vuruşta çatlar)
+//   '#honey:gem3'     Yapışkan bal    — oynatılamaz ama düşer; yanında 1 patlama eritir
+//   '#pillar:3:gem3'  Taş sütun       — yalnızca ALTINDAKİ patlama (ya da bomba/süper ile doğrudan vuruş), 3 vuruş
+//   '#carbon:0'       Karbon taş      — kırılmaz; yalnızca ⚡ süper bomba yok eder
+// Açılan/kırılan engelin içindeki taş normal taş olarak kalır.
+// ══════════════════════════════════════════════
+const HD_OBST = {
+  lock:  {name:'Kilitli Taş',     icon:'🔒', goal:'ob_lock',   verb:'kilit aç',  desc:'Yanında eşleşme yap, kilit açılır'},
+  cage:  {name:'Demir Parmaklık', icon:'⛓️', goal:'ob_cage',   verb:'kafes kır', desc:'Yanında 2 patlamayla kırılır'},
+  honey: {name:'Yapışkan Bal',    icon:'🍯', goal:'ob_honey',  verb:'bal erit',  desc:'Oynatılamaz; yanında eşleşme eritir'},
+  pillar:{name:'Taş Sütun',       icon:'🏛️', goal:'ob_pillar', verb:'sütun yık', desc:'Yalnızca altındaki patlamalarla, 3 vuruşta yıkılır'},
+  carbon:{name:'Karbon Taş',      icon:'⬛', goal:null,        verb:'',          desc:'Kırılmaz — yalnızca ⚡ süper bomba yok eder'},
+};
+const HD_GOAL_TYPE = {ob_lock:'lock', ob_cage:'cage', ob_honey:'honey', ob_pillar:'pillar'};
+const HD_MECH = {
+  bombRain:{icon:'💣', name:'Düşen Bomba',   desc:'Her 5 hamlede bir bomba düşer: 3 sn içinde o taşı patlat, yoksa 2 hamle kaybedersin'},
+  shuffle: {icon:'🔀', name:'Karışan Tahta', desc:'Her 8 hamlede tahta kendiliğinden karışır'},
+  flood:   {icon:'🌊', name:'Yükselen Su',   desc:'Her 3 hamlede su yükselir, sudaki taşlar oynatılamaz; 3. satıra ulaşırsa kaybedersin. 5 eşleşme suyu 1 satır geri çeker'},
+  darkness:{icon:'🌑', name:'Karanlık',      desc:'Yalnızca ışıklı alan görünür; ışık her hamlede kayar'},
+};
+// Bölüm sırasında değişen durum (G'ye yazılmaz → kayda girmez)
+const HD = {cfg:{}, placed:{}, start:0, turn:0, penalty:0, flood:0, matches:0, light:{r:3,c:3},
+            bombs:[], comboFail:false, cascading:false, shuffling:false, bombCascade:false, wantBomb:false};
+
+function hdParse(g){
+  const {type,val,gem}=obstacleInfo(g);
+  return (type==='cage'||type==='pillar') ? {type, hp:+val, gem} : {type, hp:1, gem:val};
+}
+function hdFalls(g){ return typeof g==='string' && g.startsWith('#honey:'); }
+function hdFrozen(r,c){ return HD.flood>0 && r>=BS-HD.flood; }      // su altındaki satırlar
+
+// ── Zorluk tablosu: yapının medeniyet içindeki sırası (k: 0-5) × bölüm (l: 0-4) ──
+// Bölüm 1-2 engelsiz · 3: kilit · 4: kilit+kafes · 5: kilit+kafes+karbon sütun
+// 2. yapı +bal · 3. yapı +sütun (+karışan tahta) · 4. yapı +karbon (+yükselen su) · 5. yapı +bomba · 6. yapı hepsi+karanlık
+function hdCfg(bIdx, l){
+  const b=BUILDINGS[bIdx];
+  if(!b) return {};
+  const civ=b.civ||0, k=civBuildingIdx(civ).indexOf(bIdx), lv=b.levels[l]||{};
+  const cfg={};
+  if(l===1){                                   // 2. bölümler: engel yok ama kısıt var
+    if(k===1||k===2) cfg.finishIn=Math.max(10,(lv.moves||20)-4);
+    else if(k>=3) cfg.noCombo=true;
+  }
+  if(l<2) return cfg;
+  const o={lock:[0,0,5,7,7][l], cage:[0,0,0,2,5][l], honey:k>=1?3:0, pillar:k>=2?2:0, carbon:(l===4?2:0)+(k>=3?2:0)};
+  // Medeniyet engelleriyle birlikte tahtanın en fazla ~%45'i kapansın: önce kilit, sonra kafes, sonra bal azalır
+  const civObs=(CIVILIZATIONS[civ].obstacle && lv.obstacles)||0;
+  let over=o.lock+o.cage+o.honey+o.pillar+o.carbon-Math.max(8,22-civObs);
+  [['lock',2],['cage',1],['honey',1]].forEach(([t,min])=>{ const d=Math.max(0,Math.min(over,o[t]-min)); o[t]-=d; over-=d; });
+  cfg.obst=o;
+  // Bölümün engel hedefi: yapının yeni engeli; 4. yapıdan sonra bölüme göre kilit → kafes → sütun
+  cfg.goal = k===1 ? 'honey' : k===2 ? 'pillar' : k>=3 ? ['lock','cage','pillar'][l-2] : (o.cage?'cage':'lock');
+  if(!o[cfg.goal]) cfg.goal = o.cage?'cage':'lock';
+  if(k>=4) cfg.bombRain=true;
+  if(k===2 && l>=3) cfg.shuffle=true;
+  if(k===3 && l>=3) cfg.flood=true;
+  if(k===5) cfg.darkness=true;
+  return cfg;
+}
+
+// generateBoard içinden: bölümün yeni engellerini yerleştir (üst satırlar açık kalır, taşlar akabilsin)
+function hdPlaceObstacles(){
+  HD.placed={};
+  const o=hdCfg(selectedBuilding, selectedLevel).obst;
+  if(!o) return;
+  const rnd=n=>Math.floor(Math.random()*n);
+  const free=(r,c)=>{ const g=G.board[r][c]; return g && !isObstacle(g) && getGemPower(g)==='normal'; };
+  const add=(t,n)=>{ HD.placed[t]=(HD.placed[t]||0)+n; };
+  // Karbon: dikey ikililer (karbon sütun)
+  for(let n=0; n<o.carbon; n+=2){
+    for(let t=0;t<120;t++){
+      const r=3+rnd(3), c=rnd(BS);
+      if(free(r,c) && free(r+1,c)){ G.board[r][c]=G.board[r+1][c]='#carbon:0'; add('carbon',2); break; }
+    }
+  }
+  const put=(type,count,r0,r1,make)=>{
+    for(let n=0;n<count;n++) for(let t=0;t<200;t++){
+      const r=r0+rnd(r1-r0+1), c=rnd(BS);
+      if(!free(r,c)) continue;
+      G.board[r][c]=make(getGemBase(G.board[r][c])); add(type,1); break;
+    }
+  };
+  put('pillar', o.pillar, 2, BS-2, g=>`#pillar:3:${g}`);   // altında bir satır olmalı
+  put('cage',   o.cage,   2, BS-1, g=>`#cage:2:${g}`);
+  put('honey',  o.honey,  1, BS-2, g=>`#honey:${g}`);
+  put('lock',   o.lock,   2, BS-1, g=>`#lock:${g}`);
+}
+
+// obstacleHit içinden: yeni engel tipleri (true → işlendi)
+function hdObstacleHit(r,c,full,h){
+  const o=hdParse(G.board[r][c]);
+  if(!HD_OBST[o.type]) return false;
+  const i=r*BS+c;
+  if(o.type==='carbon'){
+    if(h.direct && (G._hdSuperAll || (G._hdSuper && G._hdSuper.has(i)))){ G.board[r][c]=null; hdBreakFx(r,c,'carbon',true); }
+    return true;
+  }
+  if(o.type==='pillar' && !(full || h.direct || h.below)) return true;   // yandan gelen patlama sütuna işlemez
+  const hp=full ? 0 : o.hp-1;
+  if(hp>0){ G.board[r][c]=`#${o.type}:${hp}:${o.gem}`; hdBreakFx(r,c,o.type,false); return true; }
+  G.board[r][c]=o.gem;
+  hdBreakFx(r,c,o.type,true);
+  const k=HD_OBST[o.type].goal;
+  if(k && G.goals && G.goals[k]!=null){ G.goalProgress[k]=(G.goalProgress[k]||0)+1; HD.goalDirty=true; }
+  return true;
+}
+
+// ── Görseller (SVG kaplama) ──
+const HD_LOCK_SVG = `<path d="M9 19 V12 a11 11 0 0 1 22 0 V19" fill="none" stroke="#e1e5ee" stroke-width="5.5" stroke-linecap="round"/>
+  <rect x="3" y="18" width="34" height="26" rx="5" fill="#9ca3b2" stroke="#555b69" stroke-width="3"/>
+  <circle cx="20" cy="28" r="4" fill="#363b47"/><rect x="18" y="29" width="4" height="9" rx="2" fill="#363b47"/>`;
+const HD_HONEY_SVG = (()=>{
+  const hex=(cx,cy,R)=>[0,1,2,3,4,5].map(i=>{ const a=Math.PI/3*i+Math.PI/6; return (cx+R*Math.cos(a)).toFixed(1)+','+(cy+R*Math.sin(a)).toFixed(1); }).join(' ');
+  const R=17, w=R*Math.sqrt(3), cells=[];
+  for(let row=-1;row<=3;row++) for(let col=-1;col<=3;col++){
+    const cx=col*w+(row%2?w/2:0)+4, cy=row*R*1.5+8;
+    cells.push(`<polygon points="${hex(cx,cy,R-1.5)}"/>`);
+  }
+  return `<g fill="rgba(255,196,40,.42)" stroke="#c98a00" stroke-width="2.4">${cells.join('')}</g>
+    <path d="M18 100 q0 -8 4 -12 q4 4 4 12z M62 100 q0 -11 5 -15 q5 4 5 15z" fill="#f2b21c" opacity=".9"/>`;
+})();
+const HD_SVG = {
+  lock:()=>`<svg class="hd-svg" viewBox="0 0 100 100" preserveAspectRatio="none"><rect width="100" height="100" fill="rgba(110,116,132,.42)"/></svg>
+    <svg class="hd-svg hd-lock-ic" viewBox="0 0 40 46">${HD_LOCK_SVG}</svg>`,
+  cage:hp=>`<svg class="hd-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+    <g stroke="#2e3239" stroke-width="7" stroke-linecap="round" ${hp<2?'stroke-dasharray="34 9"':''}>
+      <line x1="-10" y1="30" x2="30" y2="-10"/><line x1="-10" y1="70" x2="70" y2="-10"/><line x1="10" y1="110" x2="110" y2="10"/><line x1="50" y1="110" x2="110" y2="50"/>
+      <line x1="-10" y1="30" x2="70" y2="110"/><line x1="-10" y1="-10" x2="110" y2="110"/><line x1="30" y1="-10" x2="110" y2="70"/>
+    </g>
+    <g stroke="#8d939f" stroke-width="2" stroke-linecap="round" opacity=".8" ${hp<2?'stroke-dasharray="34 9"':''}>
+      <line x1="-10" y1="70" x2="70" y2="-10"/><line x1="-10" y1="-10" x2="110" y2="110"/><line x1="10" y1="110" x2="110" y2="10"/>
+    </g>
+    <rect x="3" y="3" width="94" height="94" rx="10" fill="none" stroke="#3a3f47" stroke-width="6"/>
+    ${hp<2?'<path d="M58 4 L48 30 L60 44 L44 70 L52 96" fill="none" stroke="#f4f4f4" stroke-width="3" stroke-linejoin="round" opacity=".85"/>':''}</svg>`,
+  honey:()=>`<svg class="hd-svg" viewBox="0 0 100 100" preserveAspectRatio="none">${HD_HONEY_SVG}</svg>`,
+  pillar:hp=>`<svg class="hd-svg" viewBox="0 0 100 100" preserveAspectRatio="none">
+    <rect x="22" y="58" width="56" height="34" fill="#b9ad94"/>
+    <rect x="14" y="52" width="72" height="9" rx="2" fill="#d8ccb0" stroke="#7d7058" stroke-width="2"/>
+    <rect x="12" y="91" width="76" height="8" rx="2" fill="#d8ccb0" stroke="#7d7058" stroke-width="2"/>
+    <g stroke="#6e624c" stroke-width="3.5"><line x1="34" y1="61" x2="34" y2="91"/><line x1="66" y1="61" x2="66" y2="91"/></g>
+    ${hp<3?'<path d="M46 61 L52 72 L45 80 L50 91" fill="none" stroke="#3e3527" stroke-width="2.5"/>':''}
+    ${hp<2?'<path d="M24 66 L32 74 M70 84 L77 76 L74 70" fill="none" stroke="#3e3527" stroke-width="2.5"/>':''}</svg>`,
+};
+function hdRenderObstCell(cell, g){
+  const o=hdParse(g);
+  if(o.type==='carbon'){ cell.className='cell obst hd-carbon'; cell.innerHTML=''; return; }
+  const gd=GEMS[o.gem]||GEMS.gem1;
+  cell.style.setProperty('--gem-color',gd.color);
+  cell.style.setProperty('--gem-bg',gd.bg);
+  cell.style.setProperty('--gem-glow',gd.glow);
+  cell.className=`cell gem-cell hd-ob hd-${o.type} hp${o.hp}`;
+  cell.innerHTML=`<span class="hd-g">${gd.symbol}</span>${HD_SVG[o.type](o.hp)}`;
+}
+
+// ── Kırılma efektleri + küçük puan balonu + ses ──
+function hdBreakFx(r,c,type,destroyed){
+  const pts=destroyed?40:15;
+  G.score+=pts;
+  const sv=document.getElementById('scoreVal'); if(sv) sv.textContent=G.score;
+  ({lock:SFX.click, cage:SFX.crack, honey:SFX.squelch, pillar:destroyed?SFX.crumble:SFX.thud, carbon:SFX.crack})[type]?.();
+  const el=getCellEl(r,c);
+  if(!el) return;
+  const rc=el.getBoundingClientRect(), x=rc.left+rc.width/2, y=rc.top+rc.height/2, s=rc.width||40;
+  showScorePop('+'+pts, x, rc.top);
+  if(gfReduce()) return;
+  const piece=(css,frames,dur,html)=>{
+    const d=document.createElement('div');
+    d.className='hd-fx'; d.style.cssText=`left:${x}px;top:${y}px;`+css;
+    if(html) d.innerHTML=html;
+    gfOnce(d,frames,{duration:dur,easing:'cubic-bezier(.3,.6,.5,1)',fill:'forwards'});
+  };
+  const fly=(n,color,w,h,grav,spread)=>{
+    for(let i=0;i<n;i++){
+      const a=Math.random()*Math.PI*2, d=spread*(.5+Math.random()*.6), rot=(Math.random()-.5)*720;
+      const dx=Math.cos(a)*d, dy=Math.sin(a)*d*.6;
+      piece(`width:${w}px;height:${h}px;background:${color};border-radius:2px;`,[
+        {transform:'translate(-50%,-50%) rotate(0)',opacity:1},
+        {transform:`translate(calc(-50% + ${dx*.6}px),calc(-50% + ${dy-10}px)) rotate(${rot/2}deg)`,opacity:1,offset:.4},
+        {transform:`translate(calc(-50% + ${dx}px),calc(-50% + ${dy+grav}px)) rotate(${rot}deg)`,opacity:0}],600+Math.random()*250);
+    }
+  };
+  if(type==='lock'){
+    piece(`width:${s*.5}px;height:${s*.58}px;`,[
+      {transform:'translate(-50%,-50%) rotate(0) scale(1)',opacity:1},
+      {transform:'translate(-50%,-95%) rotate(360deg) scale(.15)',opacity:0}],600,
+      `<svg viewBox="0 0 40 46" style="width:100%;height:100%;display:block">${HD_LOCK_SVG}</svg>`);
+  } else if(type==='cage'){
+    fly(destroyed?9:3,'#3a3f47',s*.36,4,destroyed?40:20,s*(destroyed?.9:.5));
+  } else if(type==='honey'){
+    for(let i=0;i<6;i++){
+      const dx=(Math.random()-.5)*s*.8, len=30+Math.random()*35, w=5+Math.random()*4;
+      piece(`width:${w}px;height:${w*1.3}px;background:radial-gradient(circle at 35% 30%,#ffe27a,#e9a10e);border-radius:50% 50% 50% 50%/60% 60% 40% 40%;`,[
+        {transform:`translate(calc(-50% + ${dx}px),-20%) scaleY(1)`,opacity:1},
+        {transform:`translate(calc(-50% + ${dx}px),calc(-20% + ${len}px)) scaleY(1.8)`,opacity:0}],650+i*60);
+    }
+  } else if(type==='pillar'){
+    fly(destroyed?8:3,'#a99c80',destroyed?9:6,destroyed?8:6,70,s*(destroyed?.6:.35));
+  } else if(type==='carbon'){
+    fly(9,'#111114',8,8,45,s*.9);
+  }
+}
+
+// Hedef çubuğu: taş olmayan hedefler için simge
+function goalIconHTML(k){
+  const gd=GEMS[k];
+  if(gd) return `<span class="goal-gem" style="color:${gd.color};text-shadow:0 0 6px ${gd.color};">${gd.symbol}</span>`;
+  const t=HD_GOAL_TYPE[k];
+  return `<span class="goal-gem hd-goal-ic">${t?HD_OBST[t].icon:'🎯'}</span>`;
+}
+// Hedef yardım penceresi satırları
+function hdGoalHelpRow(k,target){
+  const t=HD_GOAL_TYPE[k], o=t&&HD_OBST[t];
+  const prog=Math.min(G.goalProgress[k]||0,target), done=prog>=target;
+  return `<div class="ghp-row">
+      <div class="ghp-gem hd-ghp-ic">${o?o.icon:'🎯'}</div>
+      <div class="ghp-txt"><b>${target} ${o?o.verb:''}</b> — ${o?o.desc:''}</div>
+      <div class="ghp-prog${done?' done':''}">${done?'✓':prog+'/'+target}</div>
+    </div>`;
+}
+function hdGoalHelpExtra(){
+  const cfg=HD.cfg||{}, rows=[];
+  if(cfg.finishIn) rows.push(['⏱',`<b>${cfg.finishIn} hamle ile bitir</b> — bu bölümde hamle hakkı kısıtlı`]);
+  if(cfg.noCombo) rows.push(['🚫',`<b>Kombosuz bitir</b> — art arda 3+ zincir eşleşme olursa bölüm kaybedilir`+(HD.comboFail?' <b style="color:#ff6b6b">(bozuldu)</b>':'')]);
+  Object.keys(HD_MECH).forEach(m=>{ if(cfg[m]) rows.push([HD_MECH[m].icon,`<b>${HD_MECH[m].name}</b> — ${HD_MECH[m].desc}`]); });
+  return rows.map(([ic,tx])=>`<div class="ghp-row"><div class="ghp-gem hd-ghp-ic">${ic}</div><div class="ghp-txt">${tx}</div></div>`).join('');
+}
+// Bölüm ekranı (bölüm giriş) bilgi satırları
+function hdLevelInfoHTML(bIdx,l){
+  const cfg=hdCfg(bIdx,l), rows=[];
+  if(cfg.obst) Object.entries(cfg.obst).forEach(([t,n])=>{ if(n>0) rows.push([`${HD_OBST[t].icon} ${HD_OBST[t].name} ×${n}`, HD_OBST[t].desc]); });
+  if(cfg.goal) rows.push([`🎯 Engel hedefi`, {lock:'Tüm kilitleri aç', cage:'Tüm kafesleri kır', honey:'Tüm balı erit', pillar:'Tüm sütunları yık'}[cfg.goal]]);
+  if(cfg.finishIn) rows.push([`⏱ ${cfg.finishIn} hamle ile bitir`,'Hamle hakkı kısıtlı']);
+  if(cfg.noCombo) rows.push(['🚫 Kombosuz bitir','3+ zincir eşleşme yasak']);
+  Object.keys(HD_MECH).forEach(m=>{ if(cfg[m]) rows.push([`${HD_MECH[m].icon} ${HD_MECH[m].name}`, HD_MECH[m].desc]); });
+  return rows.map(([a,b])=>`<div class="li-row li-civ hd-li"><span>${a}</span><span>${b}</span></div>`).join('');
+}
+
+Object.assign(SFX, {
+  click:  ()=>_sfxOn&&(playTone(1900,.035,.12,'square'), playTone(1250,.05,.10,'square',.05)),
+  crack:  ()=>_sfxOn&&(playTone(420,.05,.16,'sawtooth'), playTone(160,.12,.16,'square',.02), playTone(1100,.03,.07,'square',.01)),
+  squelch:()=>_sfxOn&&(playTone(260,.08,.13,'sine'), playTone(190,.10,.12,'triangle',.06), playTone(130,.14,.10,'sine',.13)),
+  thud:   ()=>_sfxOn&&(playTone(95,.14,.2,'triangle'), playTone(62,.18,.14,'sine',.02)),
+  crumble:()=>_sfxOn&&(playTone(110,.18,.2,'sawtooth'), playTone(75,.25,.18,'triangle',.05), playTone(140,.1,.12,'square',.12)),
+  tick:   n=>_sfxOn&&(playTone(n%2?1500:1050,.05,.12,'square')),
+  boom:   ()=>_sfxOn&&sfxChainBomb(),
+  water:  ()=>_sfxOn&&(playTone(330,.12,.08,'sine'), playTone(250,.16,.08,'sine',.08)),
+});
 
 
 // ══════════════════════════════════════════════
@@ -7233,8 +7588,8 @@ function buildingCard(idx, cs){
   const completedSections=bp.stars.filter(s=>s>0).length;
   const card=document.createElement('div');
   if(!unlocked){
-    const lockPct=Math.min(100,(cs/b.unlockStars)*100);
-    const remaining=b.unlockStars-cs;
+    const lp=buildingLockProgress(idx)||{prev:b,done:0,n:1};
+    const lockPct=Math.min(100,(lp.done/lp.n)*100);
     card.className='bc-locked';
     card.innerHTML=`
       <div class="bc-locked-bg"></div>
@@ -7246,15 +7601,15 @@ function buildingCard(idx, cs){
           <div class="bc-locked-req">
             <span class="bc-lock-icon">🔒</span>
             <div class="bc-locked-req-txt">
-              <strong>${b.unlockStars} yıldız gerekli</strong>
-              Kilidi açmak için ${remaining} yıldız daha topla
+              <strong>Önce ${lp.prev.name} bitmeli</strong>
+              Kilidi açmak için tüm bölümlerini en az 1 yıldızla bitir
             </div>
           </div>
           <div class="bc-locked-prog">
             <div class="bc-locked-prog-track">
               <div class="bc-locked-prog-fill" style="width:${lockPct}%"></div>
             </div>
-            <div class="bc-locked-prog-lbl">${cs} / ${b.unlockStars} ⭐</div>
+            <div class="bc-locked-prog-lbl">${lp.done} / ${lp.n} bölüm</div>
           </div>
         </div>
       </div>
@@ -7483,12 +7838,16 @@ function generateBoard(){
   let tries=0;
   while(hasAnyMatch()&&tries<50){ shuffleBoard(); tries++; }
   placeLevelObstacles();
+  hdPlaceObstacles();
   // Medeniyetin özel taşından 2 tane ile başla
   const sp=G.civ && G.civ.special;
   for(let k=0, t=0; sp && k<2 && t<40; t++){
     const r=Math.floor(Math.random()*BS), c=Math.floor(Math.random()*BS), g=G.board[r][c];
     if(g && !isObstacle(g) && getGemPower(g)==='normal'){ G.board[r][c]=g+'_'+sp; k++; }
   }
+  // Engeller çoksa yapılabilecek hamle kalmayabilir → baştan üret
+  if(!hasAnyPossibleMove() && (G._genTries=(G._genTries||0)+1)<25) return generateBoard();
+  G._genTries=0;
 }
 
 function randomGem(){ const set=G.gemSet||GEM_KEYS; return set[Math.floor(Math.random()*set.length)]; }
@@ -7506,7 +7865,7 @@ function renderGoalBar(){
     const item=document.createElement('div');
     item.className='goal-item'+(done?' done':'');
     item.id='goal_'+k;
-    item.innerHTML=`<span class="goal-gem" style="color:${GEMS[k].color};text-shadow:0 0 6px ${GEMS[k].color};">${GEMS[k].symbol}</span><span class="gi-count"><span class="gi-num"><span>${shown}</span></span>/${target}</span><span class="gi-check">✓</span>`;
+    item.innerHTML=`${goalIconHTML(k)}<span class="gi-count"><span class="gi-num"><span>${shown}</span></span>/${target}</span><span class="gi-check">✓</span>`;
     bar.appendChild(item);
   });
 }
@@ -7550,7 +7909,9 @@ function renderBoard(){
       } else if(isObstacle(gem)){
         const {type,val}=obstacleInfo(gem);
         cell.style.fontSize=Math.floor(size*0.48)+'px';
-        if(type==='ice'){
+        if(HD_OBST[type]){
+          hdRenderObstCell(cell, gem);
+        } else if(type==='ice'){
           const gd=GEMS[val]||GEMS.gem1;
           cell.style.setProperty('--gem-color',gd.color);
           cell.className='cell obst obst-ice';
@@ -7687,9 +8048,11 @@ function activatePowerGemsInMatch(matchedCells){
     if(!gem) return;
     const power = getGemPower(gem);
     if(power === 'super'){
+      G._hdSuper=G._hdSuper||new Set();                 // karbon taşı yalnızca süper bombayla kırılır
       for(let k=0;k<BS;k++){
         if(G.board[r][k]) extraSet.add(`${r},${k}`);
         if(G.board[k][c]) extraSet.add(`${k},${c}`);
+        G._hdSuper.add(r*BS+k); G._hdSuper.add(k*BS+c);
       }
       const el=getCellEl(r,c);
       if(el){ const rect=el.getBoundingClientRect(); spawnSuperFlash(rect.left+rect.width/2,rect.top+rect.height/2); }
@@ -7913,7 +8276,7 @@ function dropGems(){
     let write=BS-1;
     for(let r=BS-1;r>=0;r--){
       const g=G.board[r][c];
-      if(isObstacle(g)){ write=r-1; continue; }
+      if(isObstacle(g) && !hdFalls(g)){ write=r-1; continue; }   // bal taşı diğer taşlar gibi düşer
       if(g){
         if(write!==r){ G.board[write][c]=g; G.board[r][c]=null; }
         write--;
@@ -7941,9 +8304,9 @@ function checkEndConditions(){
 function hasAnyPossibleMove(){
   for(let r=0;r<BS;r++){
     for(let c=0;c<BS;c++){
-      if(isObstacle(G.board[r][c])) continue;
-      if(c<BS-1 && !isObstacle(G.board[r][c+1])){ swapGems(r,c,r,c+1); if(findMatches().length>0){swapGems(r,c,r,c+1);return true;} swapGems(r,c,r,c+1); }
-      if(r<BS-1 && !isObstacle(G.board[r+1][c])){ swapGems(r,c,r+1,c); if(findMatches().length>0){swapGems(r,c,r+1,c);return true;} swapGems(r,c,r+1,c); }
+      if(isObstacle(G.board[r][c]) || hdFrozen(r,c)) continue;
+      if(c<BS-1 && !isObstacle(G.board[r][c+1]) && !hdFrozen(r,c+1)){ swapGems(r,c,r,c+1); if(findMatches().length>0){swapGems(r,c,r,c+1);return true;} swapGems(r,c,r,c+1); }
+      if(r<BS-1 && !isObstacle(G.board[r+1][c]) && !hdFrozen(r+1,c)){ swapGems(r,c,r+1,c); if(findMatches().length>0){swapGems(r,c,r+1,c);return true;} swapGems(r,c,r+1,c); }
     }
   }
   return false;
@@ -8014,8 +8377,8 @@ function showHintOnBoard(){
   // İlk geçerli hamleyi bul ve hücreleri parlat
   for(let r=0;r<BS;r++){
     for(let c=0;c<BS;c++){
-      if(isObstacle(G.board[r][c])) continue;
-      if(c<BS-1 && !isObstacle(G.board[r][c+1])){
+      if(isObstacle(G.board[r][c]) || hdFrozen(r,c)) continue;
+      if(c<BS-1 && !isObstacle(G.board[r][c+1]) && !hdFrozen(r,c+1)){
         swapGems(r,c,r,c+1);
         if(findMatches().length>0){
           swapGems(r,c,r,c+1);
@@ -8030,7 +8393,7 @@ function showHintOnBoard(){
         }
         swapGems(r,c,r,c+1);
       }
-      if(r<BS-1 && !isObstacle(G.board[r+1][c])){
+      if(r<BS-1 && !isObstacle(G.board[r+1][c]) && !hdFrozen(r+1,c)){
         swapGems(r,c,r+1,c);
         if(findMatches().length>0){
           swapGems(r,c,r+1,c);
@@ -8052,6 +8415,7 @@ function showHintOnBoard(){
 // SONUÇ
 // ══════════════════════════════════════════════
 function showResult(win){
+  _lastResultWin=!!win;
   const b=BUILDINGS[selectedBuilding]; const lvl=b.levels[selectedLevel];
   const bp=G.buildingProgress[selectedBuilding];
   const prevStars=bp.stars[selectedLevel]||0;
@@ -8103,7 +8467,31 @@ function showResult(win){
   showScreen('resultScreen');
 }
 
-function afterResult(){ showMapScreen(); }
+// Sonuç ekranındaki ana buton — haritaya uğramadan:
+//   ZAFER → sıradaki bölüm (yapının son bölümüyse aynı medeniyetteki sıradaki yapı)
+//   YENİLGİ → aynı bölüm tekrar
+// Medeniyet bittiyse harita açılır; showMapScreen "Medeniyet Tamamlandı" sahnesini oynatır.
+let _lastResultWin=false;
+function nextLevelTarget(){
+  const b=BUILDINGS[selectedBuilding];
+  if(selectedLevel+1 < b.levels.length) return {b:selectedBuilding, l:selectedLevel+1};
+  const nb=selectedBuilding+1, n=BUILDINGS[nb];
+  if(!n || (n.civ||0)!==(b.civ||0)) return null;               // medeniyetin son yapısı
+  if(!isBuildingUnlocked(nb)) return {locked:nb};              // önceki bölümler eksik
+  const bp=G.buildingProgress[nb];
+  return {b:nb, l:Math.max(0, n.levels.findIndex((_,i)=>!(bp && bp.stars[i]>0)))};   // ilk oynanmamış bölüm
+}
+function afterResult(){
+  if(!_lastResultWin){ startLevel(); return; }                 // TEKRAR DENE (enerji kontrolü startLevel'da)
+  if(pendingCivReward()>=0){ showMapScreen(); return; }
+  const nx=nextLevelTarget();
+  if(!nx){ showMapScreen(); return; }
+  if(nx.locked!=null){ showToast(buildingLockMsg(nx.locked),'warning'); showMapScreen(); return; }
+  // Enerji yoksa seçimi değiştirme: modal kapanınca DEVAM ET yine aynı bölümü hedefler
+  if(G.energy<1){ showToast('⚡ Enerjin bitti! Bekle veya doldur','warning'); showEnergyModal(); return; }
+  selectedBuilding=nx.b; selectedLevel=nx.l;
+  startLevel();
+}
 function exitGame(){ G.gameActive=false; showMapScreen(); }
 
 // ══════════════════════════════════════════════
@@ -8383,10 +8771,12 @@ let mapScale = 0.65;                                  // harita yakınlaştırma
 const MAP_ZSTART = 0.65, MAP_ZMIN = 0.35, MAP_ZMAX = 1.2, MAP_ZSTEP = 0.15;
 let mapDrag = {on:false, sx:0, sy:0, sox:0, soy:0, vx:0, vy:0, lx:0, ly:0, lt:0, raf:null};
 
+const mapView = {W:430, H:580};                       // son ölçülen tuval boyutu (rAF içinde layout okumamak için)
 function clampMap(){
   const cvs = document.getElementById('mapCanvas');
   const W = cvs.offsetWidth || 430;
   const H = cvs.offsetHeight || 580;
+  mapView.W = W; mapView.H = H;
   // Sınırlar ölçeğe göre: harita ekrandan küçükse ortala, büyükse kenarlardan en fazla 60px boşluk
   const mw = MAP_W*mapScale, mh = MAP_H*mapScale, pad = 60;
   mapOX = mw + pad*2 <= W ? (W - mw)/2 : Math.min(pad, Math.max(W - mw - pad, mapOX));
@@ -8400,12 +8790,51 @@ function mapHudTop(H){
   return Math.min(H*0.3, hud ? hud.offsetHeight : 90);
 }
 
-// anim: ms cinsinden geçiş süresi (0/boş → anında; sürükleme ve pinch için)
+// anim: ms cinsinden geçiş süresi (0/boş → sonraki karede, geçişsiz; sürükleme ve pinch için)
+// Geçişsiz çağrılar requestAnimationFrame ile birleştirilir: bir karede kaç move olayı gelirse gelsin tek yazım (≤60fps)
+let mapTrRaf = 0, mapTrTransition = '';
 function applyMapTr(anim){
-  const inner = document.getElementById('mapInner');
-  inner.style.transition = anim ? `transform ${anim/1000}s ease` : 'none';
-  inner.style.transform = `translate3d(${mapOX}px,${mapOY}px,0) scale(${mapScale})`;
+  if(anim){ applyMapTrNow(anim); return; }
+  if(mapTrRaf) return;
+  mapTrRaf = requestAnimationFrame(()=>{ mapTrRaf = 0; writeMapTr(); });
 }
+// Zaten rAF içindeyken (momentum, pinch) bir kare gecikmeden hemen yaz
+function applyMapTrNow(anim){
+  if(mapTrRaf){ cancelAnimationFrame(mapTrRaf); mapTrRaf = 0; }
+  writeMapTr(anim);
+}
+function writeMapTr(anim){
+  const inner = document.getElementById('mapInner');
+  const tr = anim ? `transform ${anim/1000}s ease` : 'none';
+  if(tr !== mapTrTransition){ inner.style.transition = tr; mapTrTransition = tr; }
+  inner.style.transform = `translate3d(${mapOX}px,${mapOY}px,0) scale(${mapScale})`;
+  // Animasyonlu geçişte önce yalnızca göster, gizlemeyi geçiş bitince yap (yolda görünen sis kaybolmasın)
+  clearTimeout(mapFogT);
+  mapCullFog(!!anim);
+  if(anim) mapFogT = setTimeout(()=>mapCullFog(), anim + 30);
+}
+
+// Ekran dışında kalan sis bölgelerini gizle (bulanık, animasyonlu bulutları boşuna çizmemek için)
+let mapFogBoxes = null, mapFogT = 0;
+function mapCullFog(showOnly){
+  if(!mapFogBoxes) mapFogBoxes = [...document.querySelectorAll('#mapInner .fog-zone')].map(el=>({
+    el, x:parseFloat(el.style.left)||0, y:parseFloat(el.style.top)||0,
+    w:parseFloat(el.style.width)||0, h:parseFloat(el.style.height)||0, off:false}));
+  const m = 120, W = mapView.W, H = mapView.H;          // kenar payı: bulutlar bölgeden taşar
+  for(const f of mapFogBoxes){
+    const x0 = mapOX + f.x*mapScale, y0 = mapOY + f.y*mapScale;
+    const off = x0 > W+m || y0 > H+m || x0 + f.w*mapScale < -m || y0 + f.h*mapScale < -m;
+    if(off !== f.off && !(off && showOnly)){ f.off = off; f.el.classList.toggle('fz-off', off); }
+  }
+}
+
+// Gerçek kaydırma sırasında pahalı efektleri dondur (CSS: #mapCanvas.map-moving)
+function mapMoving(on){
+  const cvs = document.getElementById('mapCanvas');
+  if(cvs && cvs.classList.contains('map-moving') !== on) cvs.classList.toggle('map-moving', on);
+}
+const MAP_MOVE_PX = 6;                                // bundan az kayma = dokunma/tıklama
+function mapDragMoved(x, y){ return Math.abs(x-mapDrag.sx) + Math.abs(y-mapDrag.sy) > MAP_MOVE_PX; }
 
 function initMapPos(){
   const cvs = document.getElementById('mapCanvas');
@@ -8435,13 +8864,15 @@ function bindMapEvents(){
     mapDrag.sox=mapOX; mapDrag.soy=mapOY;
     mapDrag.vx=0; mapDrag.vy=0;
     mapDrag.lx=t.clientX; mapDrag.ly=t.clientY; mapDrag.lt=Date.now();
-    cancelAnimationFrame(mapDrag.raf);
+    cancelAnimationFrame(mapDrag.raf); mapMoving(false);
     cvs.classList.add('dragging');
   },{passive:false});
+  // touch-action:none + touchstart'taki preventDefault kaydırmayı zaten engeller → touchmove pasif (tarayıcı JS'i beklemez)
   cvs.addEventListener('touchmove', e=>{
-    if(MZ.pinch){ e.preventDefault(); mapPinchMove(e); return; }
-    if(!mapDrag.on) return; e.preventDefault();
+    if(MZ.pinch){ mapPinchMove(e); return; }
+    if(!mapDrag.on) return;
     const t = e.touches[0];
+    if(mapDragMoved(t.clientX, t.clientY)) mapMoving(true);
     const now=Date.now(); const dt=Math.max(1,now-mapDrag.lt);
     mapDrag.vx=(t.clientX-mapDrag.lx)/dt*16;
     mapDrag.vy=(t.clientY-mapDrag.ly)/dt*16;
@@ -8449,7 +8880,7 @@ function bindMapEvents(){
     mapOX = mapDrag.sox+(t.clientX-mapDrag.sx);
     mapOY = mapDrag.soy+(t.clientY-mapDrag.sy);
     clampMap(); applyMapTr();
-  },{passive:false});
+  },{passive:true});
   cvs.addEventListener('touchend', e=>{
     if(MZ.hadPinch){ mapPinchEnd(e); return; }         // pinch sonrası: yerleştirme/dokunma/momentum yok
     mapDrag.on=false; cvs.classList.remove('dragging');
@@ -8461,15 +8892,16 @@ function bindMapEvents(){
       const rect = cvs.getBoundingClientRect();
       const mapX = (t.clientX - rect.left - mapOX)/mapScale;
       const mapY = (t.clientY - rect.top  - mapOY)/mapScale;
+      mapMoving(false);
       placeItemOnMap(mapX, mapY);
       return;
     }
     if(totalDrag < 8) closePinPopup();
     const momentum=()=>{
       mapDrag.vx*=0.90; mapDrag.vy*=0.90;
-      if(Math.abs(mapDrag.vx)<0.25&&Math.abs(mapDrag.vy)<0.25) return;
+      if(Math.abs(mapDrag.vx)<0.25&&Math.abs(mapDrag.vy)<0.25){ mapMoving(false); return; }
       mapOX+=mapDrag.vx; mapOY+=mapDrag.vy;
-      clampMap(); applyMapTr();
+      clampMap(); applyMapTrNow();
       mapDrag.raf=requestAnimationFrame(momentum);
     };
     mapDrag.raf=requestAnimationFrame(momentum);
@@ -8480,10 +8912,11 @@ function bindMapEvents(){
     mapDrag.on=true; mapDrag.sx=e.clientX; mapDrag.sy=e.clientY;
     mapDrag.sox=mapOX; mapDrag.soy=mapOY; mapDrag.vx=0; mapDrag.vy=0;
     mapDrag.lx=e.clientX; mapDrag.ly=e.clientY; mapDrag.lt=Date.now();
-    cancelAnimationFrame(mapDrag.raf); cvs.classList.add('dragging');
+    cancelAnimationFrame(mapDrag.raf); mapMoving(false); cvs.classList.add('dragging');
   });
   window.addEventListener('mousemove', e=>{
     if(!mapDrag.on) return;
+    if(mapDragMoved(e.clientX, e.clientY)) mapMoving(true);
     const now=Date.now(); const dt=Math.max(1,now-mapDrag.lt);
     mapDrag.vx=(e.clientX-mapDrag.lx)/dt*16;
     mapDrag.vy=(e.clientY-mapDrag.ly)/dt*16;
@@ -8501,15 +8934,16 @@ function bindMapEvents(){
       const rect = cvs.getBoundingClientRect();
       const mapX = (e.clientX - rect.left - mapOX)/mapScale;
       const mapY = (e.clientY - rect.top  - mapOY)/mapScale;
+      mapMoving(false);
       placeItemOnMap(mapX, mapY);
       return;
     }
     if(totalDrag < 6) closePinPopup();
     const momentum=()=>{
       mapDrag.vx*=0.88; mapDrag.vy*=0.88;
-      if(Math.abs(mapDrag.vx)<0.2&&Math.abs(mapDrag.vy)<0.2) return;
+      if(Math.abs(mapDrag.vx)<0.2&&Math.abs(mapDrag.vy)<0.2){ mapMoving(false); return; }
       mapOX+=mapDrag.vx; mapOY+=mapDrag.vy;
-      clampMap(); applyMapTr();
+      clampMap(); applyMapTrNow();
       mapDrag.raf=requestAnimationFrame(momentum);
     };
     mapDrag.raf=requestAnimationFrame(momentum);
@@ -8615,6 +9049,7 @@ function mapPinchStart(e){
   mapDrag.on = false; mapDrag.vx = 0; mapDrag.vy = 0;
   cancelAnimationFrame(mapDrag.raf); mapZoomStop();
   document.getElementById('mapCanvas').classList.add('dragging');
+  mapMoving(true);
   const p = mapPinchPts(e);
   MZ.pinch = {d0:p.d, s0:mapScale, px:(p.mx-mapOX)/mapScale, py:(p.my-mapOY)/mapScale, cur:p};
 }
@@ -8629,7 +9064,7 @@ function mapPinchMove(e){
     mapScale = mapClampScale(p.s0*p.cur.d/p.d0);
     mapOX = p.cur.mx - p.px*mapScale;
     mapOY = p.cur.my - p.py*mapScale;
-    clampMap(); applyMapTr(); mapZoomUI();
+    clampMap(); applyMapTrNow(); mapZoomUI();
   });
 }
 function mapPinchEnd(e){
@@ -8643,7 +9078,7 @@ function mapPinchEnd(e){
     return;
   }
   mapDrag.on = false; mapDrag.vx = 0; mapDrag.vy = 0;
-  cvs.classList.remove('dragging');
+  cvs.classList.remove('dragging'); mapMoving(false);
   mapZoomIdle();
 }
 
@@ -8677,14 +9112,14 @@ function updateFogZones(){
   for(let i=1;i<=5;i++){
     const fz=document.getElementById('fz'+i), b=BUILDINGS[idxs[i]];
     if(!fz || !b) continue;
-    const open=civOpen && cs>=b.unlockStars;
+    const open=isBuildingUnlocked(idxs[i]);
     if(open){
       if(state[i]===false) spawnFogRevealEffect(fz);   // yalnızca bu oturumda yeni açıldıysa
       fz.classList.add('revealed');
     } else {
       fz.classList.remove('revealed');
       const reqEl=document.getElementById('fzReq'+i);
-      if(reqEl) reqEl.textContent = civOpen ? `⭐ ${b.unlockStars} yıldız gerek (${cs}/${b.unlockStars})` : `🔒 Önce ${CIVILIZATIONS[c-1].name} medeniyetini tamamla`;
+      if(reqEl) reqEl.textContent = buildingLockMsg(idxs[i]);
     }
     state[i]=open;
   }
@@ -8761,7 +9196,7 @@ function renderMapPins(){
           <span class="pi-name">${b.name}</span>
           <div class="pi-lock-row">
             <span class="pi-lock">🔒</span>
-            <span class="pi-req">${isCivUnlocked(civ) ? '⭐'+b.unlockStars : civIcon(civ-1)}</span>
+            <span class="pi-req">${isCivUnlocked(civ) ? (lp=>lp?lp.done+'/'+lp.n:'')(buildingLockProgress(idx)) : civIcon(civ-1)}</span>
           </div>
         </div>
         <div class="mpin-pole"></div>
@@ -9772,7 +10207,7 @@ function lmCityOpen(c){ return isBuildingUnlocked(c); }
 function lmTreePos(el){ return {x:+el.getAttribute('x'), y:+el.getAttribute('y')}; }
 function lmEndMapDrag(){
   mapDrag.on = false; mapDrag.vx = 0; mapDrag.vy = 0;
-  document.getElementById('mapCanvas')?.classList.remove('dragging');
+  document.getElementById('mapCanvas')?.classList.remove('dragging'); mapMoving(false);
 }
 
 // Dokunma/tıklama + isteğe bağlı uzun basma. Harita sürüklenirken tetiklenmez.
@@ -10331,6 +10766,7 @@ function openGoalHelp(btn){
   const pop=document.getElementById('goalHelpPop');
   const b=BUILDINGS[selectedBuilding], lvl=b&&b.levels[selectedLevel];
   const rows=Object.entries(G.goals).map(([k,target])=>{
+    if(!GEMS[k]) return hdGoalHelpRow(k,target);
     const gd=GEMS[k], info=GEM_TUT_INFO[k]||{emoji:'💎',color:''};
     const prog=Math.min(G.goalProgress[k]||0,target), done=prog>=target;
     return `<div class="ghp-row">
@@ -10341,7 +10777,7 @@ function openGoalHelp(btn){
   }).join('');
   pop.innerHTML=`
     <div class="ghp-title"><span>🎯 BÖLÜM HEDEFLERİ</span><button class="ghp-close" onclick="closeGoalHelp()" aria-label="Kapat">✕</button></div>
-    ${rows}
+    ${rows}${hdGoalHelpExtra()}
     <div class="ghp-note">⏳ Hepsini <b>${lvl?lvl.moves:G.moves} hamle</b> içinde tamamla (kalan: <b>${G.moves}</b>).<br>
     💡 Hedef renkteki taşları eşleştir. 4'lü eşleşme 💥 bomba, 5'li ⚡ süper bomba yaratır — bunlar hedefe de sayılır!</div>`;
   pop.classList.add('open');
@@ -13915,7 +14351,7 @@ function swEnd(e){
   // Aktif booster: yön önemli değil, kaydırmanın başladığı taşa uygulanır (dokunmak da yeter)
   if(BOOST.aim){ swReset(el); if(!BOOST.busy) boostApplyAt(r,c); return; }
 
-  if(isObstacle(gem)){
+  if(isObstacle(gem) || hdFrozen(r,c)){
     swReset(el); el.classList.remove('obst-shake'); void el.offsetWidth; el.classList.add('obst-shake');
     SFX.invalid(); return;
   }
@@ -13925,7 +14361,7 @@ function swEnd(e){
   let tr=r, tc=c;
   if(ax>ay) tc+=dx>0?1:-1; else tr+=dy>0?1:-1;
   const tgem=(tr>=0&&tr<BS&&tc>=0&&tc<BS) ? G.board[tr][tc] : null;
-  if(!tgem || isObstacle(tgem)){
+  if(!tgem || isObstacle(tgem) || hdFrozen(tr,tc)){
     swShake(el); SFX.invalid();
     if(tgem){ const te=getCellEl(tr,tc); te?.classList.remove('obst-shake'); void te?.offsetWidth; te?.classList.add('obst-shake'); }
     return;
@@ -14004,6 +14440,428 @@ startLevel = function(){
   window.addEventListener('mouseup',swEnd);
   board.addEventListener('contextmenu',e=>e.preventDefault());   // uzun basınca menü açılmasın
 })();
+
+
+// ══════════════════════════════════════════════
+// ZORLUK: BÖLÜM MEKANİKLERİ (bomba yağmuru · karışan tahta · yükselen su · karanlık) + kısıtlar
+// Hamle sonrası olaylar, zincirleme eşleşmeler bitip tahta durulunca (checkEndConditions) işlenir.
+// ══════════════════════════════════════════════
+function hdOnGame(){ return !!document.getElementById('gameScreen')?.classList.contains('active'); }
+function hdIdle(){ return hdOnGame() && G.gameActive && !SW.busy && !SW.on && !BOOST.busy && !HD.cascading && !HD.shuffling; }
+function hdStopBombs(){ HD.bombs.forEach(b=>clearInterval(b.t)); HD.bombs=[]; }
+
+// Tahta çizildikten sonra: su, karanlık, bomba uyarısı (hücreleri yeniden kurmadan sınıf ekler)
+function hdDecorate(){
+  const L=HD.light, dark=!!HD.cfg.darkness;
+  document.querySelectorAll('#board .cell').forEach(el=>{
+    const r=+el.dataset.r, c=+el.dataset.c;
+    const wet=hdFrozen(r,c);
+    el.classList.toggle('hd-water', wet);
+    el.classList.toggle('hd-water-top', wet && r===BS-HD.flood);
+    let wl=el.querySelector('.hd-wl');
+    if(wet && !wl){ wl=document.createElement('i'); wl.className='hd-wl'; el.appendChild(wl); }
+    else if(!wet && wl) wl.remove();
+    const d=dark ? Math.hypot(r-L.r, c-L.c) : 0;
+    el.classList.toggle('hd-dark', dark && d>2.9);
+    el.classList.toggle('hd-dim', dark && d>2.05 && d<=2.9);
+    const b=HD.bombs.find(b=>b.r===r && b.c===c);
+    el.classList.toggle('hd-bomb', !!b);
+    let bw=el.querySelector('.hd-bw');
+    if(b){ if(!bw){ bw=document.createElement('i'); bw.className='hd-bw'; el.appendChild(bw); } bw.textContent=b.n>0?b.n:'💥'; }
+    else if(bw) bw.remove();
+  });
+}
+
+function hdBanner(text){
+  const bd=document.getElementById('board'); if(!bd) return;
+  const rc=bd.getBoundingClientRect();
+  const el=document.createElement('div');
+  el.className='hd-banner'; el.textContent=text;
+  el.style.left=(rc.left+rc.width/2)+'px'; el.style.top=(rc.top+rc.height/2)+'px';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1300);
+}
+
+function hdLose(msg){
+  G.gameActive=false; hdStopBombs(); swLock(false);
+  showToast(msg,'warning'); SFX.invalid();
+  setTimeout(()=>showResult(false),500);
+}
+
+// ── Karanlık: ışık her hamlede 1-2 hücre kayar ──
+function hdMoveLight(){
+  const L=HD.light;
+  for(let t=0;t<20;t++){
+    const r=L.r+Math.floor(Math.random()*5)-2, c=L.c+Math.floor(Math.random()*5)-2;
+    if(r>=1 && r<=BS-2 && c>=1 && c<=BS-2 && (r!==L.r || c!==L.c)){ HD.light={r,c}; return; }
+  }
+}
+
+// ── Düşen bomba: 3 sn geri sayım; o hücredeki taş patlatılırsa etkisiz ──
+function hdSpawnBomb(){
+  const cand=[];
+  for(let r=0;r<BS;r++) for(let c=0;c<BS;c++){
+    const g=G.board[r][c];
+    if(!g || isObstacle(g) || hdFrozen(r,c) || HD.bombs.some(b=>b.r===r&&b.c===c)) continue;
+    if(HD.cfg.darkness && Math.hypot(r-HD.light.r,c-HD.light.c)>2.9) continue;   // karanlıkta da görülebilsin
+    cand.push([r,c]);
+  }
+  if(!cand.length) return;
+  const [r,c]=cand[Math.floor(Math.random()*cand.length)];
+  const b={r,c,n:3,t:0};
+  HD.bombs.push(b);
+  hdDecorate(); SFX.tick(3);
+  const el=getCellEl(r,c);
+  if(el){ const rc=el.getBoundingClientRect(); showComboText('💣 BOMBA!', rc.left+rc.width/2, rc.top-6, '#ff4d4d'); }
+  b.t=setInterval(()=>{
+    if(!hdOnGame()){ hdStopBombs(); return; }
+    b.n--;
+    if(b.n>0){ SFX.tick(b.n); hdDecorate(); return; }
+    clearInterval(b.t); hdDecorate(); hdBombDue(b);
+  },1000);
+}
+function hdBombDue(b){
+  if(!HD.bombs.includes(b) || !hdOnGame()) return;          // etkisiz kaldı / oyun bitti
+  if(!hdIdle()){ setTimeout(()=>hdBombDue(b),120); return; } // eşleşmeler bitince patlar
+  hdBombExplode(b);
+}
+function hdCheckDefuse(cells){
+  if(!HD.bombs.length) return;
+  HD.bombs=HD.bombs.filter(b=>{
+    if(!cells.some(({r,c})=>r===b.r && c===b.c)) return true;
+    clearInterval(b.t);
+    const el=getCellEl(b.r,b.c);
+    if(el){ const rc=el.getBoundingClientRect(); showComboText('✓ Bomba etkisiz!', rc.left+rc.width/2, rc.top-6, '#44ff88'); }
+    SFX.click();
+    return false;
+  });
+}
+function hdBombExplode(b){
+  HD.bombs=HD.bombs.filter(x=>x!==b);
+  HD.cascading=true; HD.bombCascade=true; swLock(true);
+  const r0=Math.min(b.r,BS-2), c0=Math.min(b.c,BS-2);
+  const cells=[{r:r0,c:c0},{r:r0,c:c0+1},{r:r0+1,c:c0},{r:r0+1,c:c0+1}];
+  const el=getCellEl(b.r,b.c), rc=el?el.getBoundingClientRect():null;
+  const x=rc?rc.left+rc.width:innerWidth/2, y=rc?rc.top+rc.height:innerHeight/2;
+  spawnBombWave(x,y,'#ff3b1f'); spawnParticles(x,y,'#ff5a1f',22); spawnParticles(x,y,'#ffd000',12);
+  showComboText('💥 −2 HAMLE', x, y-34, '#ff4d4d');
+  SFX.boom();
+  const bd=document.getElementById('board');
+  bd.classList.remove('hd-quake'); void bd.offsetWidth; bd.classList.add('hd-quake');
+  const lost=Math.min(2,G.moves);
+  G.moves-=lost; HD.penalty+=lost;
+  document.getElementById('movesVal').textContent=G.moves;
+  cells.forEach(({r,c})=>{ if(!isObstacle(G.board[r][c])) getCellEl(r,c)?.classList.add('matched'); });
+  setTimeout(()=>{
+    if(!hdOnGame()) return;
+    boardClearCells(cells);                       // hedefe sayılmaz; yandaki engeller vurulur
+    dropGems(); fillBoard(); renderBoard();
+    setTimeout(()=>{
+      const {cells:m}=findMatchesExtended();
+      if(m.length) processMatches(m); else checkEndConditions();
+    },350);
+  },350);
+}
+
+// ── Karışan tahta: taşların yeri değişir (güç taşları korunur), hamle garantili, eşleşmesiz ──
+function hdPermute(){
+  const pos=[];
+  for(let r=0;r<BS;r++) for(let c=0;c<BS;c++){ const g=G.board[r][c]; if(g && !isObstacle(g)) pos.push([r,c]); }
+  const gems=pos.map(([r,c])=>G.board[r][c]);
+  for(let t=0;t<200;t++){
+    for(let i=gems.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [gems[i],gems[j]]=[gems[j],gems[i]]; }
+    pos.forEach(([r,c],i)=>{ G.board[r][c]=gems[i]; });
+    if(!hasAnyMatch() && hasAnyPossibleMove()) return;
+  }
+  let t=0;
+  do{ shuffleBoard(); }while((hasAnyMatch() || !hasAnyPossibleMove()) && ++t<100);
+}
+function hdShuffle(done){
+  HD.shuffling=true; G.gameActive=false; swLock(true);
+  const bd=document.getElementById('board');
+  hdBanner('🔀 Tahta Karışıyor!'); SFX.super();
+  bd.classList.add('hd-shuffling');
+  setTimeout(()=>{ if(hdOnGame()){ hdPermute(); renderBoard(); } },500);
+  setTimeout(()=>{
+    bd.classList.remove('hd-shuffling'); HD.shuffling=false;
+    if(!hdOnGame()) return;
+    G.gameActive=true; done();
+  },1000);
+}
+
+// ── Hedef çubuğu: kısıt rozetleri ──
+function hdConsChips(){
+  const bar=document.getElementById('goalBar'), cfg=HD.cfg||{};
+  if(!bar) return;
+  const help=bar.querySelector('.goal-help-btn');
+  const chip=(id,html,cls)=>{ const d=document.createElement('div'); d.className='goal-item hd-cons '+(cls||''); d.id=id; d.innerHTML=html; bar.insertBefore(d,help); };
+  if(cfg.finishIn) chip('hdConsMoves',`<span class="goal-gem">⏱</span><span class="gi-count">≤${cfg.finishIn}</span>`);
+  if(cfg.noCombo) chip('hdConsCombo',`<span class="goal-gem">🚫</span><span class="gi-count">Kombo</span>`, HD.comboFail?'hd-fail':'');
+}
+
+// ── Mevcut akışa bağlantılar (sarmalama) ──
+const _hdOrigStartLevel = startLevel;
+startLevel = function(){
+  hdStopBombs();
+  Object.assign(HD,{cfg:hdCfg(selectedBuilding,selectedLevel), placed:{}, turn:0, penalty:0, flood:0, matches:0,
+    light:{r:3,c:3}, comboFail:false, cascading:false, shuffling:false, bombCascade:false, wantBomb:false, goalDirty:false});
+  document.getElementById('board')?.classList.remove('hd-shuffling','hd-quake');
+  const res=_hdOrigStartLevel.apply(this,arguments);
+  if(G.gameActive && hdOnGame()){
+    const cfg=HD.cfg;
+    if(cfg.finishIn && G.moves>cfg.finishIn){ G.moves=cfg.finishIn; document.getElementById('movesVal').textContent=G.moves; }
+    HD.start=G.moves;
+    const n=cfg.goal && HD.placed[cfg.goal];
+    if(n){ const k=HD_OBST[cfg.goal].goal; G.goals[k]=n; G.goalProgress[k]=0; }
+    renderGoalBar(); hdDecorate();
+    const m=Object.keys(HD_MECH).filter(x=>cfg[x]).map(x=>HD_MECH[x].icon+' '+HD_MECH[x].name);
+    if(cfg.finishIn) m.push(`⏱ ${cfg.finishIn} hamle`);
+    if(cfg.noCombo) m.push('🚫 Kombosuz');
+    if(m.length) setTimeout(()=>showToast('⚠️ '+m.join(' · '),'warning'),700);
+  }
+  return res;
+};
+
+const _hdOrigRenderBoard = renderBoard;
+renderBoard = function(){ const r=_hdOrigRenderBoard.apply(this,arguments); hdDecorate(); return r; };
+
+const _hdOrigRenderGoalBar = renderGoalBar;
+renderGoalBar = function(){ const r=_hdOrigRenderGoalBar.apply(this,arguments); hdConsChips(); return r; };
+
+const _hdOrigClear = boardClearCells;
+boardClearCells = function(cells){
+  hdCheckDefuse(cells);
+  HD.goalDirty=false;
+  const r=_hdOrigClear.apply(this,arguments);
+  if(HD.goalDirty) updateGoalBar();
+  return r;
+};
+
+const _hdOrigProcessMatches = processMatches;
+processMatches = function(){
+  HD.cascading=true;
+  const res=_hdOrigProcessMatches.apply(this,arguments);
+  if(hdOnGame()){
+    HD.matches++;
+    if(HD.cfg.flood && HD.flood>0 && HD.matches%5===0){
+      HD.flood--; hdBanner('🌊 Su çekildi'); SFX.water();
+      setTimeout(hdDecorate,0);
+    }
+    if(HD.cfg.noCombo && !HD.comboFail && !HD.bombCascade && (G._chainCount||0)>=2){
+      HD.comboFail=true;
+      document.getElementById('hdConsCombo')?.classList.add('hd-fail');
+    }
+  }
+  return res;
+};
+
+// Süper bombalı birleşimler (⚡+⚡, 💥+⚡) karbonu da kırar
+const _hdOrigMergeSS = mergeSuperSuper;
+mergeSuperSuper = function(){ G._hdSuperAll=true; return _hdOrigMergeSS.apply(this,arguments); };
+const _hdOrigMergeBS = mergeBombSuper;
+mergeBombSuper = function(){ G._hdSuperAll=true; return _hdOrigMergeBS.apply(this,arguments); };
+
+// Tahta durulunca: kısıt kontrolü + hamle başına olaylar
+const _hdOrigCheckEnd = checkEndConditions;
+checkEndConditions = function(){
+  const self=this, args=arguments, go=()=>_hdOrigCheckEnd.apply(self,args);
+  HD.cascading=false; HD.bombCascade=false;
+  if(!hdOnGame()) return go();
+  if(isGoalComplete()){ hdStopBombs(); return go(); }
+  if(HD.comboFail) return hdLose('🚫 Kombo yapıldı — bu bölüm kombosuz bitmeliydi!');
+  const cfg=HD.cfg, used=HD.start-G.moves-HD.penalty;
+  let shuffle=false, rose=false;
+  while(HD.turn<used){
+    HD.turn++;
+    if(cfg.darkness) hdMoveLight();
+    if(cfg.flood && HD.turn%3===0){ HD.flood++; rose=true; }
+    if(cfg.bombRain && HD.turn%5===0) HD.wantBomb=true;
+    if(cfg.shuffle && HD.turn%8===0) shuffle=true;
+  }
+  if(HD.flood>=3){ hdDecorate(); return hdLose('🌊 Su 3. satıra ulaştı!'); }
+  if(rose){ hdBanner('🌊 Su yükseliyor!'); SFX.water(); }
+  if(G.moves<=0){ hdStopBombs(); return go(); }
+  const after=()=>{
+    hdDecorate();
+    if(HD.wantBomb){ HD.wantBomb=false; hdSpawnBomb(); }
+    return go();
+  };
+  if(shuffle){ hdShuffle(after); return; }
+  return after();
+};
+
+const _hdOrigShowResult = showResult;
+showResult = function(){ hdStopBombs(); return _hdOrigShowResult.apply(this,arguments); };
+const _hdOrigExitGame = exitGame;
+exitGame = function(){ hdStopBombs(); return _hdOrigExitGame.apply(this,arguments); };
+
+// Bölüm giriş ekranı: yeni engel/mekanik bilgisi
+const _hdOrigOpenLevelAt = _openLevelAtIndex;
+_openLevelAtIndex = function(){
+  const r=_hdOrigOpenLevelAt.apply(this,arguments);
+  document.getElementById('levelInfo')?.insertAdjacentHTML('beforeend', hdLevelInfoHTML(selectedBuilding,selectedLevel));
+  return r;
+};
+const _hdOrigOpenLevelSelect = openLevelSelect;
+openLevelSelect = function(){
+  const r=_hdOrigOpenLevelSelect.apply(this,arguments);
+  document.getElementById('levelInfo')?.insertAdjacentHTML('beforeend', hdLevelInfoHTML(selectedBuilding,selectedLevel));
+  return r;
+};
+
+
+// ══════════════════════════════════════════════
+// OTOMATİK İPUCU — 10 sn hamle yapılmazsa en iyi hamle gösterilir
+// Sayaç: tahta boştayken artar · hamle/zincir sırasında sıfırlanır · pencere açıkken / oyun pasifken durur
+// ══════════════════════════════════════════════
+const HINT_IDLE_MS = 10000, HINT_STRONG_MS = 2000, HINT_TICK_MS = 250;
+const AH = {idle:0, move:null, strongT:0, waveT:0, els:[]};
+let hintTimer = 0;
+
+// Duraklatılmış mı (sayaç olduğu yerde bekler)
+function hintPaused(){
+  return document.hidden || !G.gameActive || (typeof TS!=='undefined' && TS.active) || !!BOOST.aim
+    || !!document.querySelector('.modal-overlay.open, .bst-modal.open, .lm-ov.open, #goalHelpPop.open, #dailyModal.open, #tutWelcome.open, #tutSpot.open, #civTransition.open');
+}
+// Tahta meşgul mü (hamle / zincirleme eşleşme / karışma → sayaç sıfırlanır)
+function hintBusy(){
+  return SW.busy || SW.on || BOOST.busy || HD.cascading || HD.shuffling;
+}
+function hintReset(){ AH.idle=0; }
+
+function hintTick(){
+  if(!document.getElementById('gameScreen')?.classList.contains('active')){ AH.idle=0; return; }
+  if(hintPaused()) return;
+  if(hintBusy()){ AH.idle=0; return; }
+  AH.idle+=HINT_TICK_MS;
+  if(AH.idle>=HINT_IDLE_MS){ AH.idle=0; showHint(); }   // gösterildikten sonra tekrar 10 sn bekle
+}
+
+// En iyi hamle: 5+ (⚡) > 4 / L-T (💥) > 3; eşitlikte hedefe en çok katkı, sonra en çok taş
+function findBestHint(){
+  const dark=(r,c)=>getCellEl(r,c)?.classList.contains('hd-dark');   // karanlıktaki taşı ele verme
+  const ok=(r,c)=>{ const g=G.board[r][c]; return g && !isObstacle(g) && !hdFrozen(r,c) && !dark(r,c); };
+  const need={};
+  Object.entries(G.goals||{}).forEach(([k,t])=>{ const n=t-(G.goalProgress[k]||0); if(n>0 && GEMS[k]) need[k]=n; });
+  let best=null;
+  for(let r=0;r<BS;r++) for(let c=0;c<BS;c++){
+    if(!ok(r,c)) continue;
+    for(const [dr,dc] of [[0,1],[1,0]]){
+      const r2=r+dr, c2=c+dc;
+      if(r2>=BS || c2>=BS || !ok(r2,c2)) continue;
+      const p1=getGemPower(G.board[r][c]), p2=getGemPower(G.board[r2][c2]);
+      const merge=(p1==='bomb'||p1==='super') && (p2==='bomb'||p2==='super');   // iki güç taşı birleşimi
+      swapGems(r,c,r2,c2);
+      const {cells,powerGems}=findMatchesExtended();
+      swapGems(r,c,r2,c2);
+      if(!cells.length && !merge) continue;
+      const tier = merge ? 4 : powerGems.some(p=>p.type==='super') ? 3 : powerGems.length ? 2 : 1;
+      // Hedefe katkı: eşleşen taşlardan hâlâ eksik olan türler (takastan sonraki konumlara göre)
+      const left={...need}; let goal=0;
+      cells.forEach(({r:rr,c:cc})=>{
+        const src = rr===r&&cc===c ? G.board[r2][c2] : rr===r2&&cc===c2 ? G.board[r][c] : G.board[rr][cc];
+        const k=getGemBase(src);
+        if(left[k]>0){ left[k]--; goal++; }
+      });
+      const score=tier*1e6 + goal*1e3 + cells.length;
+      if(!best || score>best.score) best={r1:r,c1:c,r2,c2,score,tier,goal};
+    }
+  }
+  return best;
+}
+
+function clearHint(){
+  clearTimeout(AH.strongT); clearInterval(AH.waveT);
+  AH.els.forEach(e=>e.remove()); AH.els=[];
+  document.getElementById('board')?.classList.remove('ah-on');
+  document.querySelectorAll('#board .ah-cell').forEach(el=>{
+    el.classList.remove('ah-cell','ah-strong','ah-soft');
+    el.querySelector('.ah-arrow')?.remove();
+  });
+  document.querySelectorAll('.goal-item.ah-goal').forEach(el=>el.classList.remove('ah-goal'));
+  AH.move=null;
+}
+
+function showHint(){
+  clearHint();
+  if(!G.gameActive) return;
+  const m=findBestHint();
+  if(!m) return;
+  const a=getCellEl(m.r1,m.c1), b=getCellEl(m.r2,m.c2);
+  if(!a || !b) return;
+  AH.move=m;
+  document.getElementById('board').classList.add('ah-on');
+  // Ok yönü: her taş diğerine doğru bakar
+  const dirA = m.r2>m.r1 ? 'down' : 'right', dirB = m.r2>m.r1 ? 'up' : 'left';
+  [[a,dirA],[b,dirB]].forEach(([el,dir])=>{
+    el.classList.add('ah-cell','ah-strong');
+    const ar=document.createElement('i');
+    ar.className='ah-arrow ah-'+dir;
+    ar.innerHTML='<svg viewBox="0 0 24 24"><path d="M4 12h12M11 6l6 6-6 6" fill="none" stroke="#f5c842" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    el.appendChild(ar);
+  });
+  AH.strongT=setTimeout(()=>{
+    [a,b].forEach(el=>{ el.classList.remove('ah-strong'); el.classList.add('ah-soft'); });
+    clearInterval(AH.waveT);
+  }, HINT_STRONG_MS);
+  // Altın parçacıklar: iki taştan çıkıp ortada buluşur (güçlü evre boyunca)
+  hintParticles(a,b);
+  AH.waveT=setInterval(()=>hintParticles(a,b), 650);
+  // Hedef bağlantısı
+  const bases=[getGemBase(G.board[m.r1][m.c1]), getGemBase(G.board[m.r2][m.c2])]
+    .filter(k=>k && G.goals[k]!=null && (G.goalProgress[k]||0)<G.goals[k]);
+  if(bases.length){
+    bases.forEach(k=>document.getElementById('goal_'+k)?.classList.add('ah-goal'));
+    const ra=a.getBoundingClientRect(), rb=b.getBoundingClientRect();
+    const tip=document.createElement('div');
+    tip.className='ah-tip'; tip.textContent='Bu taşı patlat!';
+    tip.style.left=((ra.left+rb.right)/2)+'px';
+    tip.style.top=Math.min(ra.top,rb.top)+'px';
+    document.body.appendChild(tip); AH.els.push(tip);
+    setTimeout(()=>{ tip.remove(); AH.els=AH.els.filter(e=>e!==tip); },1500);
+  }
+}
+
+function hintParticles(a,b){
+  if(gfReduce() || !a.isConnected || !b.isConnected) return;
+  const ra=a.getBoundingClientRect(), rb=b.getBoundingClientRect();
+  const ax=ra.left+ra.width/2, ay=ra.top+ra.height/2, bx=rb.left+rb.width/2, by=rb.top+rb.height/2;
+  const mx=(ax+bx)/2, my=(ay+by)/2;
+  [[ax,ay],[bx,by]].forEach(([x,y])=>{
+    for(let i=0;i<4;i++){
+      const p=document.createElement('div');
+      const s=3+Math.random()*3, jx=(Math.random()-.5)*ra.width*.6, jy=(Math.random()-.5)*ra.height*.6;
+      p.className='ah-spark';
+      p.style.cssText=`left:${x+jx}px;top:${y+jy}px;width:${s}px;height:${s}px;`;
+      gfOnce(p,[
+        {transform:'translate(-50%,-50%) scale(.4)',opacity:0},
+        {transform:'translate(-50%,-50%) scale(1)',opacity:1,offset:.25},
+        {transform:`translate(calc(-50% + ${mx-x-jx}px),calc(-50% + ${my-y-jy}px)) scale(.6)`,opacity:0}
+      ],{duration:620+Math.random()*180,delay:i*70,easing:'cubic-bezier(.4,0,.6,1)',fill:'forwards'});
+    }
+  });
+}
+
+// ── Bağlantılar ──
+(function hintBind(){
+  hintTimer=setInterval(hintTick, HINT_TICK_MS);
+  const board=document.getElementById('board');
+  // Tahtaya dokunmak (kaydırma başlangıcı) ipucunu kapatır ve sayacı sıfırlar
+  const touch=()=>{ clearHint(); hintReset(); };
+  board?.addEventListener('touchstart', touch, {passive:true, capture:true});
+  board?.addEventListener('mousedown', touch, {capture:true});
+})();
+const _ahOrigCellClick = onCellClick;
+onCellClick = function(){ clearHint(); hintReset(); return _ahOrigCellClick.apply(this,arguments); };
+const _ahOrigStartLevel = startLevel;
+startLevel = function(){ clearHint(); hintReset(); return _ahOrigStartLevel.apply(this,arguments); };
+// Tahta yeniden çizilince (hamle, yenileme, karışma) eski ipucu geçersiz
+const _ahOrigRenderBoard = renderBoard;
+renderBoard = function(){ if(AH.move) clearHint(); hintReset(); return _ahOrigRenderBoard.apply(this,arguments); };
+const _ahOrigShowResult = showResult;
+showResult = function(){ clearHint(); return _ahOrigShowResult.apply(this,arguments); };
+const _ahOrigExitGame = exitGame;
+exitGame = function(){ clearHint(); return _ahOrigExitGame.apply(this,arguments); };
 
 initLanguage();
 </script>
