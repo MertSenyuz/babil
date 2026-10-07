@@ -82,6 +82,7 @@ const OL = {
     ol_mlb_title:['🏆 Liderlik','🏆 Leaders'],
     ol_mlb_aria:['Liderlik','Leaderboard'],
     ol_mlb_more:['Tümünü gör →','See all →'],
+    ol_mlb_min:['Küçült','Minimise'],
   };
   const esc = s=>s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   Object.entries(M).forEach(([k,[tr,en]])=>{
@@ -883,27 +884,79 @@ setLanguage = function(){
   return res;
 };
 
-// ── Harita yanı liderlik paneli: ilk 10, harita açıkken 30 sn'de bir yenilenir ──
-// Görünürlük CSS'te: body.map-on + geniş ekran (mobilde gizli). Dar ekranda istek de atılmaz.
+// ── Harita liderliği: ilk 10, harita açıkken 30 sn'de bir yenilenir ──
+// Geniş ekran: oyun alanının sağında 200px panel (#mapLbPanel).
+// Dar ekran / mobil: haritanın içinde sağ üstte küçük kart (#mapMiniLb) — mini (ilk 3) / açık (ilk 10) / simge.
 const MLB_CACHE = 'babil_mlb_cache';
+const MLB_MODE  = 'babil_mlb_mode';
 const MLB_EVERY = 30000;
-const _mlbWide = window.matchMedia('(min-width:920px) and (min-height:420px)');
-function mlbVisible(){ return document.body.classList.contains('map-on') && _mlbWide.matches && document.visibilityState!=='hidden'; }
+const MLB = {rows:null, me:null, note:'', mode:'mini'};
+try{ const m=localStorage.getItem(MLB_MODE); if(m==='mini' || m==='open' || m==='pill') MLB.mode=m; }catch(e){}
+function mlbVisible(){ return document.body.classList.contains('map-on') && document.visibilityState!=='hidden'; }
+
+// Harita içi kartı oluştur (bir kez)
+(function mlbMiniInit(){
+  const host=document.getElementById('mapScreen');
+  if(!host || document.getElementById('mapMiniLb')) return;
+  const el=document.createElement('div');
+  el.id='mapMiniLb';
+  el.className='map-mlb';
+  el.innerHTML=`
+    <button class="map-mlb-pill" onclick="mlbSetMode('mini')" aria-label="Liderlik"><span>🏆</span><b id="mapMiniRank" data-no-i18n></b></button>
+    <div class="map-mlb-card">
+      <div class="map-mlb-head">
+        <button class="map-mlb-title" onclick="mlbSetMode(MLB.mode==='open'?'mini':'open')">🏆 Liderlik <i class="map-mlb-chev">▾</i></button>
+        <button class="map-mlb-min" onclick="mlbSetMode('pill')" aria-label="Küçült">–</button>
+      </div>
+      <div class="map-mlb-list" id="mapMiniList"></div>
+      <button class="map-mlb-more" onclick="showLeaderboardScreen()">Tümünü gör →</button>
+    </div>`;
+  host.appendChild(el);
+})();
+
+function mlbSetMode(m){
+  MLB.mode=m;
+  try{ localStorage.setItem(MLB_MODE, m); }catch(e){}
+  mlbPaint();
+}
+
+// Üst bar (medeniyet sekmeleriyle) yüksekliği değişebilir → kartı hemen altına yerleştir
+function mlbPlace(){
+  const el=document.getElementById('mapMiniLb'), hud=document.querySelector('#mapScreen .map-hud');
+  if(el && hud && hud.offsetHeight) el.style.top=(hud.offsetHeight+8)+'px';
+}
 
 function mlbRender(rows, me, note){
-  const list=document.getElementById('mapLbList');
-  if(!list) return;
+  MLB.rows=rows||[]; MLB.me=me||null; MLB.note=note||'';
+  mlbPaint();
+}
+
+function mlbPaint(){
+  const rows=MLB.rows||[], note=MLB.note;
   const myId=CURRENT_USER && CURRENT_USER.sbId;
   const isMe=r=>myId!=null && String(r.user_id)===String(myId);
-  const row=(r, rank)=>`<div class="map-lb-row${isMe(r) ? ' me' : ''}${rank<=3 ? ' top' : ''}">
-    <span class="map-lb-rank">${rank<=3 ? ['🥇','🥈','🥉'][rank-1] : rank}</span>
-    <span class="map-lb-name">${olEsc(r.username)}</span>
-    <span class="map-lb-stars">⭐ ${olNum(r.total_stars)}</span>
+  const row=(r, rank, cls)=>`<div class="${cls}-row${isMe(r) ? ' me' : ''}${rank<=3 ? ' top' : ''}" data-no-i18n>
+    <span class="${cls}-rank">${rank<=3 ? ['🥇','🥈','🥉'][rank-1] : rank}</span>
+    <span class="${cls}-name">${olEsc(r.username)}</span>
+    <span class="${cls}-stars">⭐ ${olNum(r.total_stars)}</span>
   </div>`;
-  rows=rows||[];
-  let html=rows.map((r,i)=>row(r, i+1)).join('');
-  if(me && me.rank>rows.length) html+=`<div class="map-lb-gap">⋮</div>`+row(me.row, me.rank);   // ilk 10 dışındaysan altta
-  list.innerHTML=(note ? `<div class="map-lb-note">${olEsc(note)}</div>` : '')+html;
+  const i=rows.findIndex(isMe);
+  const mine=i>=0 ? {rank:i+1, row:rows[i]} : MLB.me;   // kendi sıran (ilk 10 içinde ya da dışında)
+  const list=(n, cls)=>{
+    const top=rows.slice(0, n);
+    let html=top.map((r,k)=>row(r, k+1, cls)).join('');
+    if(mine && mine.rank>top.length) html+=`<div class="${cls}-gap">⋮</div>`+row(mine.row, mine.rank, cls);
+    return (note ? `<div class="${cls}-note">${olEsc(note)}</div>` : '')+html;
+  };
+  const side=document.getElementById('mapLbList');
+  if(side) side.innerHTML=list(10, 'map-lb');
+  const mini=document.getElementById('mapMiniLb');
+  if(mini){
+    mini.dataset.mode=MLB.mode;
+    document.getElementById('mapMiniList').innerHTML=list(MLB.mode==='open' ? 10 : 3, 'map-mlb');
+    document.getElementById('mapMiniRank').textContent=mine ? mine.rank+'.' : '';
+    mlbPlace();
+  }
 }
 
 async function mlbLoad(){
@@ -948,7 +1001,7 @@ showScreen = function(id){
   mlbUpdate();
   return res;
 };
-(_mlbWide.addEventListener ? _mlbWide.addEventListener('change', mlbUpdate) : _mlbWide.addListener(mlbUpdate));
+window.addEventListener('resize', mlbPlace);
 document.addEventListener('visibilitychange', mlbUpdate);
 window.addEventListener('online', ()=>{ if(mlbVisible()) mlbLoad(); });
 // Bölüm sonrası senkron bitince haritaya dönüldüğünde güncel sıra görünsün
