@@ -1,0 +1,28 @@
+/* ═══ OTOMATİK İPUCU ═══ */
+#board .cell{transition:transform .12s,box-shadow .12s,filter .4s,background-color .4s,opacity .35s;}
+#board.ah-on .cell:not(.ah-cell){opacity:.7;}
+#board .cell.ah-cell{z-index:6;border:2px solid #f5c842;box-shadow:0 0 20px #f5c842,inset 0 0 8px rgba(245,200,66,.45);}
+#board .cell.ah-strong{animation:ahPulse .66s ease-in-out 3;}
+@keyframes ahPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.2)}}
+#board .cell.ah-soft{animation:ahSoft 1.8s ease-in-out infinite;}
+@keyframes ahSoft{0%,100%{transform:scale(1);box-shadow:0 0 10px rgba(245,200,66,.55)}50%{transform:scale(1.06);box-shadow:0 0 22px #f5c842}}
+.ah-arrow{position:absolute;width:42%;height:42%;z-index:7;pointer-events:none;font-style:normal;
+  filter:drop-shadow(0 0 2px rgba(0,0,0,.9)) drop-shadow(0 0 5px rgba(245,200,66,.8));animation:ahArrow .8s ease-in-out infinite;}
+.ah-arrow svg{width:100%;height:100%;display:block;}
+.ah-right{right:-12%;top:29%;--rot:0deg;--dx:1;--dy:0;}
+.ah-left{left:-12%;top:29%;--rot:180deg;--dx:-1;--dy:0;}
+.ah-down{bottom:-12%;left:29%;--rot:90deg;--dx:0;--dy:1;}
+.ah-up{top:-12%;left:29%;--rot:-90deg;--dx:0;--dy:-1;}
+@keyframes ahArrow{0%,100%{transform:translate(calc(var(--dx)*-3px),calc(var(--dy)*-3px)) rotate(var(--rot));opacity:.7}
+  50%{transform:translate(calc(var(--dx)*4px),calc(var(--dy)*4px)) rotate(var(--rot));opacity:1}}
+.ah-spark{position:fixed;pointer-events:none;z-index:9989;border-radius:50%;
+  background:radial-gradient(circle,#fff6c8,#f5c842 60%,rgba(245,200,66,0));box-shadow:0 0 6px #f5c842;}
+.ah-tip{position:fixed;transform:translate(-50%,-130%);z-index:9992;pointer-events:none;font:800 13px 'Cinzel',serif;color:#1a0f00;
+  background:linear-gradient(135deg,#ffe08a,#f5c842);padding:5px 10px;border-radius:10px;white-space:nowrap;
+  box-shadow:0 4px 14px rgba(0,0,0,.5),0 0 12px rgba(245,200,66,.6);animation:ahTip 1.5s ease both;}
+.ah-tip::after{content:'';position:absolute;left:50%;bottom:-5px;margin-left:-5px;border:5px solid transparent;border-bottom:0;border-top-color:#f5c842;}
+@keyframes ahTip{0%{opacity:0;transform:translate(-50%,-100%) scale(.8)}15%{opacity:1;transform:translate(-50%,-130%) scale(1)}
+  80%{opacity:1}100%{opacity:0;transform:translate(-50%,-150%)}}
+.goal-item.ah-goal{animation:ahGoal 1.2s ease-in-out infinite;}
+@keyframes ahGoal{0%,100%{box-shadow:0 0 0 rgba(245,200,66,0)}50%{box-shadow:0 0 14px rgba(245,200,66,.75);border-color:#f5c842}}
+@media (prefers-reduced-motion:reduce){ #board .cell.ah-strong,#board .cell.ah-soft,.ah-arrow,.goal-item.ah-goal,.ah-tip{animation:none!important;} }

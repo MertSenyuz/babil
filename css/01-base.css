@@ -1,0 +1,68 @@
+/* Tamamen bağımsız — internet gerektirmez */
+@font-face{font-family:'Cinzel';font-weight:400 900;font-style:normal;
+  src:local('Palatino Linotype'),local('Palatino'),local('Book Antiqua'),local('Georgia');}
+@font-face{font-family:'Crimson Pro';font-weight:300 600;font-style:normal;
+  src:local('Georgia'),local('Times New Roman'),local('Times'),local('serif');}
+:root{
+  --sky:#1a0a2e;--sky2:#2d1b5e;--gold:#f5c842;--gold2:#e8a020;
+  --stone:#8b7355;--stone2:#6b5535;
+  --bg-grad:linear-gradient(180deg,#0d0520 0%,#1a0a2e 40%,#2d1b5e 100%);
+  --panel:#1e0f3a;--panel2:#2a1850;--border:#4a3070;
+  --text:#f0e8d0;--muted:#9880b8;--radius:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html{width:100%;height:100%;height:-webkit-fill-available;overflow:hidden;background:var(--sky);}
+body{width:100%;height:100%;height:-webkit-fill-available;overflow:hidden;background:var(--sky);
+  font-family:'Crimson Pro',Georgia,serif;color:var(--text);
+  background:var(--bg-grad);display:flex;justify-content:center;align-items:stretch;
+  padding-top:env(safe-area-inset-top);
+  padding-bottom:env(safe-area-inset-bottom);
+  padding-left:env(safe-area-inset-left);
+  padding-right:env(safe-area-inset-right);}
+#app{width:100%;max-width:430px;height:100%;min-height:-webkit-fill-available;display:flex;flex-direction:column;
+  position:relative;overflow:hidden;}
+
+/* ═══ EKRANLAR ═══ */
+.screen{position:absolute;inset:0;display:none;flex-direction:column;overflow:hidden;}
+.screen.active{display:flex;}
+
+/* ═══ YILDIZLAR ═══ */
+#stars{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+.star{position:absolute;border-radius:50%;background:#fff;animation:twinkle var(--d,2s) ease-in-out infinite var(--delay,0s);}
+@keyframes twinkle{0%,100%{opacity:.2;transform:scale(1);}50%{opacity:.9;transform:scale(1.3);}}
+
+/* ═══ MENÜ ═══ */
+#menuScreen{z-index:10;justify-content:center;align-items:center;padding:20px 20px calc(52% + 10px);}
+.menu-city{position:absolute;bottom:0;left:0;right:0;height:54%;pointer-events:none;}
+.menu-city svg{width:100%;height:100%;}
+.menu-logo{position:relative;z-index:2;text-align:center;margin-bottom:28px;}
+.menu-logo h1{font-family:'Cinzel',serif;font-size:40px;font-weight:900;
+  color:var(--gold);text-shadow:0 0 40px rgba(245,200,66,.7),0 0 80px rgba(245,200,66,.3);
+  line-height:1.1;letter-spacing:3px;}
+.menu-logo p{font-size:15px;color:var(--muted);margin-top:8px;letter-spacing:.05em;}
+.btn{display:block;width:100%;padding:15px;background:linear-gradient(135deg,var(--gold2),var(--gold));
+  border:none;border-radius:var(--radius);font-family:'Cinzel',serif;font-size:17px;
+  font-weight:600;color:#1a0a2e;cursor:pointer;text-align:center;
+  box-shadow:0 4px 20px rgba(245,200,66,.35);transition:all .15s;position:relative;z-index:2;}
+.btn:active{transform:scale(.97);box-shadow:0 2px 10px rgba(245,200,66,.2);}
+.btn.secondary{background:var(--panel2);color:var(--gold);
+  border:1px solid var(--border);box-shadow:none;margin-top:10px;}
+.menu-btns{width:82%;position:relative;z-index:2;}
+
+/* ═══ ŞEHİR SİLUETİ (tüm ekranlar) ═══ */
+.city-silhouette{position:absolute;bottom:0;left:0;right:0;height:80px;pointer-events:none;z-index:1;opacity:.55;}
+.city-silhouette svg{width:100%;height:100%;}
+
+/* ═══ TOP BAR ═══ */
+.top-bar{display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px 10px;background:rgba(10,4,28,.7);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border);flex-shrink:0;z-index:10;position:relative;}
+.top-stat{display:flex;align-items:center;gap:6px;}
+.top-stat .icon{font-size:18px;}
+.top-stat .val{font-family:'Cinzel',serif;font-size:14px;font-weight:600;color:var(--gold);}
+.top-stat .lbl{font-size:10px;color:var(--muted);display:block;line-height:1;}
+.energy-bar-wrap{display:flex;align-items:center;gap:8px;flex:1;margin:0 12px;}
+.energy-bar{flex:1;height:8px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden;border:1px solid var(--border);}
+.energy-fill{height:100%;background:linear-gradient(90deg,#ff8800,#ffcc00);
+  border-radius:4px;transition:width .4s ease;}
+.energy-txt{font-size:11px;color:var(--muted);white-space:nowrap;font-family:'Cinzel',serif;}

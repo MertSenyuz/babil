@@ -1,0 +1,100 @@
+/* ═══ HARİTA EKRANI ═══ */
+#mapScreen{z-index:10;overflow:hidden;}
+#mapCanvas{flex:1;overflow:hidden;position:relative;cursor:grab;user-select:none;background:#06030f;touch-action:none;}
+#mapCanvas.dragging{cursor:grabbing;}
+#mapInner{position:absolute;top:0;left:0;width:2000px;height:2000px;will-change:transform;transform-origin:0 0;
+  transform:translateZ(0);backface-visibility:hidden;-webkit-backface-visibility:hidden;}
+/* Sürükleme performansı: .map-moving yalnızca parmak/fare gerçekten kayınca eklenir (dokunma/tıklama etkilenmez) */
+#mapCanvas.map-moving .fog-cloud,#mapCanvas.map-moving .fog-shine,#mapCanvas.map-moving .mpin-dot{animation-play-state:paused;}
+#mapCanvas.map-moving .mpin,#mapCanvas.map-moving .mpin-card,#mapCanvas.map-moving .map-item-marker,#mapCanvas.map-moving .lm-bld{pointer-events:none;transition:none;}
+/* Ekran dışındaki sis bölgeleri çizilmez (applyMapTr içinde hesaplanır) */
+.fog-zone.fz-off{display:none;}
+#mapTerrainSvg{display:block;width:2000px;height:2000px;position:absolute;top:0;left:0;}
+
+/* ── GELİŞMİŞ PIN KARTLARI ── */
+.mpin{
+  position:absolute;
+  transform:translate(-50%,-100%);
+  display:flex;flex-direction:column;align-items:center;
+  z-index:20;pointer-events:auto;
+}
+.mpin.unlocked{cursor:pointer;}
+.mpin.locked{cursor:default;}
+
+/* Açık pin */
+.mpin-card{
+  background:rgba(10,4,26,.95);
+  border:2px solid var(--mc,#4a3070);
+  border-radius:14px;
+  padding:10px 12px 8px;
+  text-align:center;
+  min-width:96px;max-width:118px;
+  box-shadow:0 6px 24px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.04),inset 0 1px 0 rgba(255,255,255,.06);
+  /* backdrop-filter kaldırıldı: zemin %95 opak, bulanıklık görünmüyordu ama her karede yeniden hesaplanıyordu */
+  transition:border-color .25s,box-shadow .25s,transform .18s;
+  position:relative;overflow:hidden;
+}
+.mpin-card::before{
+  content:'';position:absolute;inset:0;border-radius:14px;
+  background:linear-gradient(160deg,rgba(255,255,255,.04) 0%,transparent 60%);
+  pointer-events:none;
+}
+.mpin.unlocked .mpin-card:hover{
+  transform:translateY(-3px) scale(1.04);
+  box-shadow:0 10px 32px rgba(0,0,0,.9),0 0 20px var(--mc-glow,rgba(245,200,66,.25));
+}
+.mpin.unlocked .mpin-card:active{transform:scale(.96);}
+
+/* Tamamlanmış */
+.mpin-card.gold{
+  border-color:#f5c842;
+  box-shadow:0 6px 24px rgba(0,0,0,.8),0 0 18px rgba(245,200,66,.4),inset 0 1px 0 rgba(255,255,255,.1);
+}
+.mpin-card.gold::after{
+  content:'✦';position:absolute;top:4px;right:6px;
+  font-size:9px;color:#f5c842;opacity:.7;
+}
+
+/* Kilitli pin */
+.mpin-card.locked-c{
+  border-color:#1e1038;
+  background:rgba(6,2,16,.9);
+  filter:saturate(.2);
+}
+
+/* Pin ikonlar */
+.pi-icon-wrap{
+  width:40px;height:40px;border-radius:10px;margin:0 auto 6px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;
+  background:var(--mc-bg,rgba(255,255,255,.06));
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);
+}
+.mpin-card.locked-c .pi-icon-wrap{filter:grayscale(1) blur(1.5px);opacity:.25;}
+.pi-name{font-family:'Cinzel',serif;font-size:9px;color:var(--mc,#f5c842);font-weight:700;display:block;line-height:1.3;letter-spacing:.3px;}
+.pi-stars{font-size:11px;letter-spacing:2px;display:block;margin-top:4px;}
+.pi-lock-row{display:flex;align-items:center;justify-content:center;gap:3px;margin-top:4px;}
+.pi-lock{font-size:11px;display:block;}
+.pi-req{font-size:8px;color:#5a4080;display:block;font-family:'Cinzel',serif;}
+
+/* Bayrak direği */
+.mpin-pole{
+  width:2px;height:18px;
+  background:linear-gradient(180deg,var(--mc,#f5c842),rgba(0,0,0,.3));
+  flex-shrink:0;
+}
+.mpin.locked .mpin-pole{background:linear-gradient(180deg,#2a1850,transparent);}
+.mpin-dot{
+  width:10px;height:10px;border-radius:50%;
+  background:var(--mc,#f5c842);
+  box-shadow:0 0 10px var(--mc,#f5c842),0 0 20px var(--mc,#f5c842);
+  flex-shrink:0;
+  animation:pinPulse 2s ease-in-out infinite;
+}
+.mpin.locked .mpin-dot{
+  background:#2a1850;box-shadow:none;animation:none;
+}
+@keyframes pinPulse{
+  0%,100%{transform:scale(1);opacity:1;}
+  50%{transform:scale(1.4);opacity:.7;}
+}

@@ -1,0 +1,12 @@
+/* ═══ KAYDIRMA (SWIPE) GERİBİLDİRİMİ ═══ */
+#board{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;}
+#board .cell:active{transform:none;}
+#board .cell.sw-drag{transition:none!important;animation:swGlow .9s ease-in-out infinite!important;z-index:6;
+  box-shadow:0 0 0 2px var(--gold),0 0 18px var(--gem-color,var(--gold)),0 0 30px rgba(245,200,66,.45);filter:brightness(1.18);}
+@keyframes swGlow{0%,100%{box-shadow:0 0 0 2px var(--gold),0 0 14px var(--gem-color,var(--gold));}
+  50%{box-shadow:0 0 0 3px var(--gold),0 0 26px var(--gem-color,var(--gold)),0 0 40px rgba(245,200,66,.5);}}
+#board .cell.sw-slide{transition:transform .15s ease-out!important;animation:none!important;z-index:6;}
+#board .cell.sw-shake{animation:swShake .32s ease-in-out!important;}
+@keyframes swShake{0%,100%{transform:translate(0,0);}20%{transform:translateX(-5px) rotate(-4deg);}
+  40%{transform:translateX(5px) rotate(4deg);}60%{transform:translateX(-4px) rotate(-2deg);}80%{transform:translateX(3px);}}
+@media (prefers-reduced-motion:reduce){ #board .cell.sw-drag{animation:none!important;} #board .cell.sw-slide{transition:none!important;} }

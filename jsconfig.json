@@ -1,0 +1,10 @@
+{
+  // js/ dosyaları modül değil, ortak global kapsamlı klasik script'ler.
+  // Bu ayar VS Code'un dosyalar arası tanımları bulmasını sağlar.
+  "compilerOptions": {
+    "target": "ES2022",
+    "checkJs": false,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"]
+  },
+  "include": ["js/**/*.js"]
+}

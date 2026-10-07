@@ -1,0 +1,50 @@
+/* ═══ ZORLUK: yeni engel taşları ═══ */
+.cell.hd-ob{overflow:hidden;cursor:not-allowed;}
+.cell.hd-ob .hd-g{position:relative;z-index:0;line-height:1;display:inline-block;}
+.hd-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1;}
+.cell.hd-lock{filter:saturate(.55);}
+.cell.hd-lock .hd-lock-ic{inset:auto 3% 3% auto;width:46%;height:52%;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6));}
+.cell.hd-cage{box-shadow:inset 0 0 0 2px #2e3239,inset 0 0 12px rgba(0,0,0,.6);}
+.cell.hd-honey{border-color:#e0a312;box-shadow:inset 0 0 14px rgba(255,190,30,.55),0 0 6px rgba(255,190,30,.4);}
+.cell.hd-honey .hd-g{filter:sepia(.35);}
+.cell.hd-pillar .hd-g{transform:translateY(-26%) scale(.78);}
+.cell.hd-carbon{background:radial-gradient(circle at 35% 30%,#1d1d21,#060607 70%);border:2px solid #000;
+  box-shadow:inset 0 2px 4px rgba(255,255,255,.06),inset 0 -3px 6px rgba(0,0,0,.8);cursor:not-allowed;}
+.goal-item .hd-goal-ic{font-size:14px;text-shadow:none;}
+.ghp-gem.hd-ghp-ic{background:rgba(255,255,255,.06);font-size:16px;}
+.goal-item.hd-cons{border-style:dashed;}
+.goal-item.hd-cons.hd-fail{border-color:#ff5a5a;background:rgba(255,60,60,.14);}
+.goal-item.hd-cons.hd-fail .gi-count{color:#ff6b6b;text-decoration:line-through;}
+.hd-fx{position:fixed;pointer-events:none;z-index:9990;}
+/* Yükselen su */
+.cell.hd-water{cursor:not-allowed;}
+.hd-wl{position:absolute;inset:-3px;border-radius:inherit;pointer-events:none;z-index:2;
+  background:linear-gradient(180deg,rgba(90,170,255,.28),rgba(20,90,210,.55));box-shadow:inset 0 0 10px rgba(150,210,255,.35);}
+.cell.hd-water-top .hd-wl{background:linear-gradient(180deg,rgba(150,215,255,.12) 0%,rgba(90,170,255,.35) 30%,rgba(20,90,210,.58));
+  animation:hdWave 2.2s ease-in-out infinite;}
+.cell.hd-water-top .hd-wl::before{content:'';position:absolute;left:0;right:0;top:-2px;height:5px;border-radius:50%;background:rgba(200,235,255,.7);filter:blur(1px);}
+@keyframes hdWave{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+/* Karanlık mod: ışık kayınca yumuşak geçiş */
+#board .cell{transition:transform .12s,box-shadow .12s,filter .4s,background-color .4s;}
+#board .cell.hd-dim{filter:brightness(.28) saturate(.4);}
+#board .cell.hd-dark{filter:none;background:#07040f!important;border-color:rgba(255,255,255,.05)!important;
+  color:transparent!important;text-shadow:none!important;box-shadow:none!important;}
+#board .cell.hd-dark>*:not(.hd-bw){visibility:hidden;}
+#board .cell.hd-bomb{filter:none;}
+/* Düşen bomba */
+.cell.hd-bomb{animation:hdBombBlink .5s ease-in-out infinite alternate;z-index:3;}
+@keyframes hdBombBlink{from{box-shadow:0 0 0 2px #ff2a2a,0 0 8px #ff2a2a}to{box-shadow:0 0 0 3px #ff2a2a,0 0 22px #ff2a2a;background-color:rgba(255,40,40,.35)}}
+.hd-bw{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:4;font-style:normal;
+  font:900 1.15em 'Cinzel',serif;color:#fff;text-shadow:0 0 6px #ff0000,0 0 2px #000;
+  background:radial-gradient(circle,rgba(255,40,40,.6),transparent 72%);pointer-events:none;}
+/* Karışan tahta + bomba sarsıntısı */
+#board.hd-shuffling{animation:hdShuffle 1s ease-in-out;}
+@keyframes hdShuffle{0%,100%{transform:none;filter:none}25%{transform:rotate(-3deg) scale(.94);filter:blur(1px)}
+  50%{transform:rotate(3deg) scale(.9);filter:blur(3px) brightness(1.3)}75%{transform:rotate(-2deg) scale(.96);filter:blur(1px)}}
+#board.hd-quake{animation:bstShake .4s linear;}
+.hd-banner{position:fixed;transform:translate(-50%,-50%);z-index:9991;pointer-events:none;font:900 19px 'Cinzel',serif;color:#fff;
+  padding:10px 18px;border-radius:14px;background:rgba(10,4,26,.88);border:2px solid var(--gold);box-shadow:0 0 24px rgba(245,200,66,.5);
+  white-space:nowrap;animation:hdBanner 1.3s ease both;}
+@keyframes hdBanner{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.06)}
+  25%{transform:translate(-50%,-50%) scale(1)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-70%)}}
+@media (prefers-reduced-motion:reduce){ #board.hd-shuffling,.cell.hd-water-top .hd-wl,.cell.hd-bomb,.hd-banner{animation:none!important;} }
