@@ -4,10 +4,11 @@
 
 /* Giriş ekranı */
 #authScreen{
-  z-index:100;justify-content:center;align-items:center;
-  padding:28px 24px;overflow-y:auto;
+  z-index:100;align-items:center;
+  padding:28px 24px;overflow-y:auto;-webkit-overflow-scrolling:touch;
 }
-.auth-logo{text-align:center;margin-bottom:28px;}
+/* Ortalamayı auto margin ile yap: içerik ekrandan uzunsa üstü kesilmez, kaydırılabilir */
+.auth-logo{text-align:center;margin-top:auto;margin-bottom:28px;flex-shrink:0;}
 .auth-logo h1{font-family:'Cinzel',serif;font-size:34px;font-weight:900;
   color:var(--gold);text-shadow:0 0 30px rgba(245,200,66,.5);letter-spacing:2px;}
 .auth-logo p{font-size:13px;color:var(--muted);margin-top:6px;}
@@ -19,7 +20,7 @@
   background:var(--panel);
   border:1px solid var(--border);
   border-radius:20px;
-  padding:24px 22px;
+  padding:24px 22px;margin-bottom:auto;flex-shrink:0;
   position:relative;z-index:2;
 }
 .auth-tabs{display:flex;gap:0;margin-bottom:22px;background:var(--panel2);border-radius:12px;padding:3px;}
@@ -48,7 +49,7 @@
 .auth-input{
   width:100%;padding:12px 14px;
   background:var(--panel2);border:1px solid var(--border);
-  border-radius:12px;color:var(--text);font-size:15px;
+  border-radius:12px;color:var(--text);font-size:16px; /* <16px iOS'ta odaklanınca yakınlaştırıp kaydırıyor */
   font-family:'Crimson Pro',Georgia,serif;outline:none;
   transition:border-color .2s;
 }
