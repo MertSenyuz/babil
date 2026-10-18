@@ -51,22 +51,6 @@ function updateCivState(){
             buildingsDone:idxs.filter(isBuildingComplete).length, complete:isCivComplete(c.id)};
   });
 }
-// Eski kayıtlar (Babil → Mısır → Roma → Çin sürümü): Babil ilerlemesi korunur, sonraki medeniyetler sıfırdan başlar
-// Not: initAuth() bu bloktan önce çalışır → burada yalnızca hoisting'li fonksiyon kullanılır, const/let değil.
-function migrateCivSave(d){
-  if(!d || d.civVersion===2) return;
-  if(Array.isArray(d.buildingProgress) && d.buildingProgress.length>6) d.buildingProgress = d.buildingProgress.slice(0,6);
-  delete d.mapCiv; delete d.currentCivilization; delete d.civilizationProgress;
-  if(CURRENT_USER){
-    const r=CURRENT_USER.civRewards;
-    if(r) Object.keys(r).forEach(k=>{ if(+k>0) delete r[k]; });
-    if(Array.isArray(CURRENT_USER.achievements))
-      CURRENT_USER.achievements = CURRENT_USER.achievements.filter(a=>!/^civ_[1-9]$/.test(a));
-    if(CURRENT_USER.historySeen) Object.keys(CURRENT_USER.historySeen).forEach(k=>{ if(+k>5) delete CURRENT_USER.historySeen[k]; });
-  }
-  d.civVersion = 2;
-}
-
 // ── Özel taş etkileri (eşleşmeye dahil olunca) ──
 function activateSpecialStone(power, r, c, gem, extraSet){
   const sp=SPECIAL_STONES[power];

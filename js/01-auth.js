@@ -83,6 +83,22 @@ function syncGameToUser(){
   saveUserData(CURRENT_USER);
 }
 
+// Eski kayıtlar (Babil → Mısır → Roma → Çin sürümü): Babil ilerlemesi korunur, sonraki medeniyetler sıfırdan başlar
+// Not: initAuth() (29-land.js) 35-civilizations.js yüklenmeden çalışır → bu fonksiyon burada durmalı.
+function migrateCivSave(d){
+  if(!d || d.civVersion===2) return;
+  if(Array.isArray(d.buildingProgress) && d.buildingProgress.length>6) d.buildingProgress = d.buildingProgress.slice(0,6);
+  delete d.mapCiv; delete d.currentCivilization; delete d.civilizationProgress;
+  if(CURRENT_USER){
+    const r=CURRENT_USER.civRewards;
+    if(r) Object.keys(r).forEach(k=>{ if(+k>0) delete r[k]; });
+    if(Array.isArray(CURRENT_USER.achievements))
+      CURRENT_USER.achievements = CURRENT_USER.achievements.filter(a=>!/^civ_[1-9]$/.test(a));
+    if(CURRENT_USER.historySeen) Object.keys(CURRENT_USER.historySeen).forEach(k=>{ if(+k>5) delete CURRENT_USER.historySeen[k]; });
+  }
+  d.civVersion = 2;
+}
+
 function loadGameFromUser(){
   if(!CURRENT_USER||!CURRENT_USER.gameData) return;
   const d = CURRENT_USER.gameData;
