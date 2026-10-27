@@ -1,7 +1,10 @@
 // ══════════════════════════════════════════════
 // OYUN BOARD
 // ══════════════════════════════════════════════
-const BS=7;
+// Tahta boyutu bölüme göre: 1-2. bölüm 6×6, 3-4. bölüm 7×7, 5. bölüm 8×8.
+// BS her okunduğunda yeniden hesaplanır; selectedLevel startLevel'dan önce ayarlanır.
+function getBoardSize(){ return selectedLevel<=1 ? 6 : selectedLevel<=3 ? 7 : 8; }
+Object.defineProperty(window,'BS',{get:getBoardSize, configurable:true});
 
 function startLevel(){
   if(G.energy<1){ showToast('⚡ Enerjin bitti! Bekle veya doldur','warning'); showEnergyModal(); return; }

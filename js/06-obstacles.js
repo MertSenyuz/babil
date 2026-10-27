@@ -73,7 +73,7 @@ function hdPlaceObstacles(){
   // Karbon: dikey ikililer (karbon sütun)
   for(let n=0; n<o.carbon; n+=2){
     for(let t=0;t<120;t++){
-      const r=3+rnd(3), c=rnd(BS);
+      const r=3+rnd(BS-4), c=rnd(BS);   // r+1 tahtanın içinde kalmalı
       if(free(r,c) && free(r+1,c)){ G.board[r][c]=G.board[r+1][c]='#carbon:0'; add('carbon',2); break; }
     }
   }

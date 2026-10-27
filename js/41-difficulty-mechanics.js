@@ -160,7 +160,7 @@ const _hdOrigStartLevel = startLevel;
 startLevel = function(){
   hdStopBombs();
   Object.assign(HD,{cfg:hdCfg(selectedBuilding,selectedLevel), placed:{}, turn:0, penalty:0, flood:0, matches:0,
-    light:{r:3,c:3}, comboFail:false, cascading:false, shuffling:false, bombCascade:false, wantBomb:false, goalDirty:false});
+    light:{r:BS>>1,c:BS>>1}, comboFail:false, cascading:false, shuffling:false, bombCascade:false, wantBomb:false, goalDirty:false});
   document.getElementById('board')?.classList.remove('hd-shuffling','hd-quake');
   const res=_hdOrigStartLevel.apply(this,arguments);
   if(G.gameActive && hdOnGame()){
