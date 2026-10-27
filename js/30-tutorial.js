@@ -377,8 +377,7 @@ doRegister = function(){
   if(u){
     u.tutorial={};                 // yeni profil → tüm öğretici adımları bekliyor
     saveUserData(u);
-    TUT_NEW_USER=u.username;
-    setTimeout(tutWelcomeOpen,300);
+    TUT_NEW_USER=u.username;       // öğretici, kayıttan hemen sonraki otomatik girişte (enterGame) açılır
   }
   return res;
 };

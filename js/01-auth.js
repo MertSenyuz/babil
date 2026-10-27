@@ -232,7 +232,7 @@ function doRegister(){
   switchAuthTab('giris');
   document.getElementById('loginName').value = name;
   document.getElementById('loginPass').value = pass;
-  showToast('✦ Hesap oluşturuldu! Şimdi giriş yap.');
+  showToast('✦ Hesap oluşturuldu!');
 
   // Alanları temizle
   document.getElementById('regName').value='';

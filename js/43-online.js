@@ -372,33 +372,15 @@ function olStatus(){
 
 // ── Giriş / kayıt / çıkış sarmalayıcıları ──
 const _olOrigDoRegister = doRegister;
-doRegister = async function(){
+// Kayıt Supabase'i beklemez: profil anında localStorage'a yazılır ve kullanıcı hemen oyuna girer.
+// Çevrimiçi hesap, girişin başlattığı arka plan senkronunda açılır (olAfterLogin → olSync → olEnsureAccount).
+// Ad çevrimiçi başka oyuncuya aitse olEnsureAccount profili "sadece bu cihazda" işaretler ve uyarır.
+doRegister = function(){
   const name=document.getElementById('regName').value.trim();
-  const pass=document.getElementById('regPass').value;
-  const errEl=document.getElementById('regErr');
-  const btn=document.querySelector('#panelKayit .btn');
-  // Ad yerelde boşsa çevrimiçi de alınmış mı? (kontrol başarısızsa yerel kayıtla devam)
-  if(name.length>=2 && pass.length>=4 && pass===document.getElementById('regPass2').value && !getUserData(name) && olOnline()){
-    if(btn) btn.disabled=true;
-    try{
-      const sb=await olTimeout(olClient(), 4000).catch(()=>null);
-      if(sb && await olFindUser(sb, name)){
-        errEl.textContent=t('ol_name_taken'); errEl.classList.add('show');
-        return;
-      }
-    }catch(e){ olWarn('register-check', e); }
-    finally{ if(btn) btn.disabled=false; }
-  }
   const before=getAllUsers().length;
   const res=_olOrigDoRegister.apply(this, arguments);
-  const u=getAllUsers().length>before ? getUserData(name) : null;
-  if(u){
-    u.sbHash=await olHash(name, pass);
-    saveUserData(u);
-    try{
-      const sb=olOnline() && await olClient();
-      if(sb) await olEnsureAccount(sb, u);
-    }catch(e){ olWarn('register', e); }   // çevrimdışı: hesap ilk senkronda açılır
+  if(getAllUsers().length>before && getUserData(name)){
+    doLogin().catch(e=>olWarn('register-login', e));   // giriş alanları kayıtta dolduruldu; yerel giriş anlık
   }
   return res;
 };
