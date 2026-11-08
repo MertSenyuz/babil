@@ -70,6 +70,7 @@ function syncGameToUser(){
   CURRENT_USER.gameData = {
     energy: G.energy,
     lastEnergyTime: G.lastEnergyTime,
+    energyCap: G.maxEnergy,
     coins: G.coins,
     totalStars: getTotalStarsReal(),
     buildingProgress: G.buildingProgress,
@@ -103,8 +104,10 @@ function loadGameFromUser(){
   if(!CURRENT_USER||!CURRENT_USER.gameData) return;
   const d = CURRENT_USER.gameData;
   migrateCivSave(d);   // eski Mısır/Roma/Çin kayıtları → Mezopotamya yolculuğu (Babil korunur)
-  G.energy = d.energy??5;
+  G.energy = d.energy??10;
   G.lastEnergyTime = d.lastEnergyTime??Date.now();
+  // Eski kayıtlar (üst sınır 5 iken): yeni sınıra geçişte enerji bir kerelik doldurulur
+  if((d.energyCap??5) < G.maxEnergy){ G.energy = Math.max(G.energy, G.maxEnergy); G.lastEnergyTime = Date.now(); }
   G.coins = d.coins??100;
   G.totalStars = d.totalStars??0;
   G.buildingProgress = d.buildingProgress??[];
@@ -256,7 +259,7 @@ function doLogin(){
 
   // Yeni kullanıcıysa oyun verisini ilk kez oluştur
   if(!user.gameData){
-    G.energy=5; G.lastEnergyTime=Date.now(); G.coins=100;
+    G.energy=10; G.lastEnergyTime=Date.now(); G.coins=100;
     G.buildingProgress = BUILDINGS.map(b=>({stars:b.levels.map(()=>0)}));
     syncGameToUser();
   } else {
@@ -282,7 +285,7 @@ function doLogout(){
 
 function initGameForUser(){
   // Yeni kullanıcı için oyun başlat
-  G.energy=5; G.lastEnergyTime=Date.now(); G.coins=100;
+  G.energy=10; G.lastEnergyTime=Date.now(); G.coins=100;
   G.buildingProgress = BUILDINGS.map(b=>({stars:b.levels.map(()=>0)}));
   G.mapCiv = 0;
   syncGameToUser();

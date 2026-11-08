@@ -226,7 +226,7 @@ async function olEnsureAccount(sb, u){
     u.sbId=r.id;
   } else {
     const gd=u===CURRENT_USER ? {coins:G.coins, energy:G.energy} : (u.gameData||{});
-    const row={username:u.username, password_hash:u.sbHash, gold:gd.coins??100, gems:0, energy:gd.energy??5};
+    const row={username:u.username, password_hash:u.sbHash, gold:gd.coins??100, gems:0, energy:gd.energy??10};
     if((await olCols(sb)).users) row.avatar=u.avatar||null;
     const ins=await olQ(sb.from('users').insert(row).select('id').single());
     u.sbId=ins.id;
@@ -442,7 +442,7 @@ async function olRestoreUser(sb, r){
     username:r.username,
     avatar:r.avatar||AVATARS[0],
     createdAt:Date.now(),
-    gameData:{energy:r.energy??5, lastEnergyTime:Date.now(), coins:r.gold??100, totalStars:stars,
+    gameData:{energy:r.energy??10, lastEnergyTime:Date.now(), coins:r.gold??100, totalStars:stars,
               buildingProgress:bp, civVersion:2, mapCiv:null},
     stats:{gamesPlayed:0, wins:0, losses:0, totalStars:stars, totalCoins:r.gold??100, energyUsed:0, maxStarsInGame:0},
     achievements:[],

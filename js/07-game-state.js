@@ -2,7 +2,7 @@
 // OYUN DURUMU
 // ══════════════════════════════════════════════
 let G = {
-  energy:5,maxEnergy:5,lastEnergyTime:Date.now(),
+  energy:10,maxEnergy:10,lastEnergyTime:Date.now(),
   coins:100,totalStars:0,
   buildingProgress:[],
   currentBuilding:0,currentLevel:0,
