@@ -27,6 +27,13 @@ function openCityDesignFromShop(){
   closeCityDesign();
 }
 
+// Harita detay paneli "Şehri Dizayn Et" (index.html #mdpDesignBtn): paneldeki yapı, yoksa son dokunulan pin
+function openCityDesignFromDetail(){
+  const bIdx = _mdpActiveBuilding>=0 ? _mdpActiveBuilding : _pinPopupBIdx;
+  closeMapDetail();
+  openCityDesign(bIdx);
+}
+
 function openMapPlaceFromShop(){
   showMapScreen();
   // Harita yüklendikten sonra yerleştirme modunu aç

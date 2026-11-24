@@ -113,12 +113,8 @@ function loadGameFromUser(){
   G.buildingProgress = d.buildingProgress??[];
   ensureProgress();   // eski kayıtlar: yeni yapılar ve 4-5. bölümler sıfır yıldızla eklenir
   G.mapCiv = d.mapCiv ?? d.currentCivilization ?? null;   // showMapScreen kilitliyse en yüksek açık medeniyete düzeltir
-  // Enerji yenileme
-  const gained = Math.floor((Date.now()-G.lastEnergyTime)/(3*60*1000));
-  if(gained>0&&G.energy<G.maxEnergy){
-    G.energy=Math.min(G.maxEnergy,G.energy+gained);
-    G.lastEnergyTime=Date.now();
-  }
+  // Çevrimdışıyken biriken enerji (08-energy.js; bu dosya ondan önce yüklenir ama bu fonksiyon sonradan çağrılır)
+  regenEnergy();
 }
 
 // ── BAŞARIM KONTROL ──
@@ -154,15 +150,18 @@ function switchAuthTab(tab){
   if(tab==='kayit') renderAvatarGrid();
 }
 
+const authEsc = s=>String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
 function renderSavedUsers(){
   const list = document.getElementById('savedUsersList');
   const users = getAllUsers();
   if(users.length===0){ list.innerHTML=''; return; }
+  // Ad serbest metin (tırnak, <, > içerebilir): HTML'e kaçışla yazılır, onclick adı data-user'dan okur
   list.innerHTML = users.slice(-3).reverse().map(u=>`
-    <div class="auth-user-row" onclick="quickLogin('${u.username}')">
-      <div class="auth-user-av">${u.avatar||'👤'}</div>
+    <div class="auth-user-row" data-user="${authEsc(u.username)}" onclick="quickLogin(this.dataset.user)">
+      <div class="auth-user-av">${authEsc(u.avatar||'👤')}</div>
       <div>
-        <div class="auth-user-name" data-no-i18n>${u.username}</div>
+        <div class="auth-user-name" data-no-i18n>${authEsc(u.username)}</div>
         <div class="auth-user-info">⭐ ${u.stats?.totalStars||0} · 🪙 ${u.stats?.totalCoins||0}</div>
       </div>
       <div class="auth-user-arrow">›</div>

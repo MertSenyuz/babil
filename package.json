@@ -1,0 +1,11 @@
+{
+  "name": "babil",
+  "private": true,
+  "description": "Babil Şehri — mobil eşleştirme oyunu",
+  "scripts": {
+    "test": "node --test \"tests/*.test.js\""
+  },
+  "devDependencies": {
+    "jsdom": "^29.1.1"
+  }
+}

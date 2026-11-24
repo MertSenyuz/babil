@@ -2,14 +2,31 @@
 // ENERJİ
 // ══════════════════════════════════════════════
 let energyTimerInterval;
+const ENERGY_REGEN_MS = 3*60*1000;   // 3 dakikada +1
+
+// Geçen sürede biriken enerjiyi ekler. Sayaç "şimdi"ye değil kazanılan dilimler kadar ilerler:
+// sıradaki enerjiye doğru biriken süre kaybolmaz; telefon uykudan uyanınca kaçırılan tüm enerjiler gelir.
+function regenEnergy(){
+  if(G.energy>=G.maxEnergy) return 0;
+  const gained=Math.floor((Date.now()-G.lastEnergyTime)/ENERGY_REGEN_MS);
+  if(gained<=0) return 0;
+  const before=G.energy;
+  G.energy=Math.min(G.maxEnergy,G.energy+gained);
+  G.lastEnergyTime = G.energy>=G.maxEnergy ? Date.now() : G.lastEnergyTime+gained*ENERGY_REGEN_MS;
+  return G.energy-before;
+}
+
+// Enerji harcama: doluyken harcanırsa geri sayım o an başlar; zaten doluyorsa süren geri sayım bozulmaz
+function spendEnergy(n=1){
+  if(G.energy>=G.maxEnergy) G.lastEnergyTime=Date.now();
+  G.energy-=n;
+}
+
 function startEnergyTimer(){
   clearInterval(energyTimerInterval);
   energyTimerInterval=setInterval(()=>{
     if(G.energy>=G.maxEnergy){ updateEnergyUI(); return; }
-    const elapsed=Date.now()-G.lastEnergyTime;
-    if(elapsed>=3*60*1000){
-      G.energy=Math.min(G.maxEnergy,G.energy+1);
-      G.lastEnergyTime=Date.now();
+    if(regenEnergy()>0){
       saveGame(); updateEnergyUI();
       nfEnergyCheck();   // enerji maksimuma ulaştıysa bildir
     }
@@ -19,7 +36,7 @@ function startEnergyTimer(){
 
 function getEnergyTimerStr(){
   if(G.energy>=G.maxEnergy) return "DOLU ✦";
-  const remaining=Math.max(0,3*60*1000-(Date.now()-G.lastEnergyTime));
+  const remaining=Math.max(0,ENERGY_REGEN_MS-(Date.now()-G.lastEnergyTime));
   const m=Math.floor(remaining/60000),s=Math.floor((remaining%60000)/1000);
   return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 }

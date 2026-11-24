@@ -8,7 +8,7 @@ Object.defineProperty(window,'BS',{get:getBoardSize, configurable:true});
 
 function startLevel(){
   if(G.energy<1){ showToast('⚡ Enerjin bitti! Bekle veya doldur','warning'); showEnergyModal(); return; }
-  G.energy--; G.lastEnergyTime=Date.now();
+  spendEnergy();
   if(CURRENT_USER){ CURRENT_USER.stats.energyUsed=(CURRENT_USER.stats.energyUsed||0)+1; }
   saveGame(); updateEnergyUI();
   SFX.energy();
@@ -30,10 +30,8 @@ function startLevel(){
 }
 
 function generateBoard(){
-  G.board=[];
-  for(let r=0;r<BS;r++){ G.board[r]=[]; for(let c=0;c<BS;c++) G.board[r][c]=randomGem(); }
-  let tries=0;
-  while(hasAnyMatch()&&tries<50){ shuffleBoard(); tries++; }
+  G.board=Array.from({length:BS}, ()=>Array(BS).fill(null));
+  shuffleBoard();   // hazır eşleşmesiz kurulur (8×8'de rastgele deneme yetmiyordu)
   placeLevelObstacles();
   hdPlaceObstacles();
   // Medeniyetin özel taşından 2 tane ile başla
@@ -48,7 +46,18 @@ function generateBoard(){
 }
 
 function randomGem(){ const set=G.gemSet||GEM_KEYS; return set[Math.floor(Math.random()*set.length)]; }
-function shuffleBoard(){ for(let r=0;r<BS;r++) for(let c=0;c<BS;c++) if(!isObstacle(G.board[r][c])) G.board[r][c]=randomGem(); }
+// Hazır eşleşme oluşturmayan taş: soldaki iki ya da üstteki iki aynı renkse o renk seçilmez.
+// Satır satır doldururken her 3'lü, son hücresi seçilirken engellenir → sonuç kesinlikle eşleşmesiz.
+function randomGemNoMatch(r,c){
+  const set=G.gemSet||GEM_KEYS, b=G.board;
+  const base=(rr,cc)=>rr>=0 && cc>=0 ? getGemBase(b[rr][cc]) : null;
+  const left=base(r,c-1), up=base(r-1,c);
+  const ban=[left===base(r,c-2) && left, up===base(r-2,c) && up];
+  const ok=set.filter(k=>!ban.includes(k));
+  return ok[Math.floor(Math.random()*ok.length)];
+}
+// Engel olmayan tüm hücreleri yeniden, hazır eşleşme olmadan doldurur
+function shuffleBoard(){ for(let r=0;r<BS;r++) for(let c=0;c<BS;c++) if(!isObstacle(G.board[r][c])) G.board[r][c]=randomGemNoMatch(r,c); }
 
 function renderGoalBar(){
   const bar=document.getElementById('goalBar');
