@@ -100,3 +100,51 @@
   0%,100%{transform:scale(1);opacity:1;}
   50%{transform:scale(1.4);opacity:.7;}
 }
+/* Medeniyet dokusu: renk değişmez, sadece desen değişir. Tüm desenler --civ rengini kullanır;
+   seçili dönemin katmanı 1.2s'de belirir, öncekinin katmanı aynı sürede kaybolur (35-civilizations.js → applyMapCiv) */
+#mapCivTex{position:absolute;top:0;left:0;width:2000px;height:2000px;pointer-events:none;
+  --tx:color-mix(in srgb,var(--civ) 60%,transparent);--tx2:color-mix(in srgb,var(--civ) 30%,transparent);}
+#mapCivTex .mct{position:absolute;inset:0;opacity:0;transition:opacity 1.2s ease;}
+#mapCanvas[data-civ="babylon"] .mct-babylon,#mapCanvas[data-civ="persia"] .mct-persia,#mapCanvas[data-civ="alexander"] .mct-alexander,
+#mapCanvas[data-civ="parthia"] .mct-parthia,#mapCanvas[data-civ="sasanian"] .mct-sasanian,#mapCanvas[data-civ="early_islam"] .mct-early_islam,
+#mapCanvas[data-civ="abbasid"] .mct-abbasid,#mapCanvas[data-civ="mongol"] .mct-mongol,#mapCanvas[data-civ="ottoman"] .mct-ottoman{opacity:.35;}
+/* Babil: çöl kumu — ince, düzensiz noktalar */
+.mct-babylon{background:radial-gradient(circle,var(--tx) 0 1px,transparent 1.5px) 0 0/7px 7px,
+  radial-gradient(circle,var(--tx2) 0 1px,transparent 1.5px) 3px 4px/11px 11px;}
+/* Pers: halı — tekrar eden baklava deseni */
+.mct-persia{background:linear-gradient(45deg,transparent 47%,var(--tx) 47% 53%,transparent 53%) 0 0/36px 36px,
+  linear-gradient(-45deg,transparent 47%,var(--tx) 47% 53%,transparent 53%) 0 0/36px 36px,
+  radial-gradient(circle,var(--tx2) 0 3px,transparent 3.5px) 0 0/36px 36px;}
+/* İskender: mermer — ince yatay çizgiler + yumuşak damarlar */
+.mct-alexander{background:repeating-linear-gradient(0deg,var(--tx2) 0 1px,transparent 1px 9px),
+  repeating-linear-gradient(168deg,transparent 0 80px,var(--tx) 80px 81px,transparent 81px 190px);}
+/* Part: toprak/kil — farklı boyutta lekeler */
+.mct-parthia{background:radial-gradient(ellipse 60% 40%,var(--tx2) 0 40%,transparent 70%) 0 0/23px 17px,
+  radial-gradient(circle,var(--tx) 0 1.5px,transparent 2px) 5px 9px/13px 13px,
+  radial-gradient(ellipse 50% 50%,var(--tx2) 0 30%,transparent 70%) 11px 3px/41px 31px;}
+/* Sasani: ateş ışığı — yerden yükselen yumuşak alev parıltısı */
+.mct-sasanian{background:radial-gradient(ellipse 70% 45% at 50% 100%,var(--tx) 0%,transparent 70%),
+  radial-gradient(circle at 22% 38%,var(--tx2) 0%,transparent 22%),
+  radial-gradient(circle at 74% 62%,var(--tx2) 0%,transparent 20%),
+  radial-gradient(circle at 48% 18%,var(--tx2) 0%,transparent 18%);
+}
+/* İslam'ın Yükselişi: geometrik desen — sekiz köşeli yıldız (SVG maske, renk --civ) */
+.mct-early_islam{background:var(--tx);
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Cg fill='none' stroke='%23000' stroke-width='1.2'%3E%3Crect x='14' y='14' width='20' height='20'/%3E%3Crect x='14' y='14' width='20' height='20' transform='rotate(45 24 24)'/%3E%3Cpath d='M0 24H6M42 24H48M24 0V6M24 42V48'/%3E%3C/g%3E%3C/svg%3E") 0 0/48px 48px repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Cg fill='none' stroke='%23000' stroke-width='1.2'%3E%3Crect x='14' y='14' width='20' height='20'/%3E%3Crect x='14' y='14' width='20' height='20' transform='rotate(45 24 24)'/%3E%3Cpath d='M0 24H6M42 24H48M24 0V6M24 42V48'/%3E%3C/g%3E%3C/svg%3E") 0 0/48px 48px repeat;}
+/* Abbasi: lapis lazuli — yoğun ince noktalar + seyrek iri benekler */
+.mct-abbasid{background:radial-gradient(circle,var(--tx2) 0 .8px,transparent 1.2px) 0 0/4px 4px,
+  radial-gradient(circle,var(--tx) 0 1.6px,transparent 2.2px) 7px 5px/19px 23px,
+  radial-gradient(circle,var(--tx) 0 1px,transparent 1.5px) 13px 2px/29px 17px;}
+/* Moğol: bozkır otu — kesik kesik yatay ince çizgiler */
+.mct-mongol{background:repeating-linear-gradient(0deg,var(--tx) 0 1px,transparent 1px 6px);
+  -webkit-mask:repeating-linear-gradient(90deg,#000 0 14px,transparent 14px 20px);
+  mask:repeating-linear-gradient(90deg,#000 0 14px,transparent 14px 20px);}
+/* Osmanlı: ipek/atlas — çapraz ince çizgiler + yumuşak parlaklık */
+.mct-ottoman{background:repeating-linear-gradient(135deg,var(--tx2) 0 1px,transparent 1px 6px),
+  linear-gradient(115deg,transparent 30%,var(--tx2) 50%,transparent 70%) 0 0/400px 400px;}
+/* Medeniyet haritaları (20-map.js → renderMapTerrain): yeni harita eskisinin üstünde belirir, Babil'e dönüşte üstteki solar */
+#mapTerrainSvg .terr-in{animation:terrIn 1s ease both;}
+#mapTerrainSvg .terr-out{animation:terrOut 1s ease both;pointer-events:none;}
+@keyframes terrIn{from{opacity:0}}
+@keyframes terrOut{to{opacity:0}}

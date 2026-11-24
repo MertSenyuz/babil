@@ -2300,6 +2300,12 @@
       </svg>
       <!-- Medeniyet tema rengi: harita üzerine yumuşak renk tonu -->
       <div id="mapEraTint" aria-hidden="true"></div>
+      <!-- Medeniyet dokusu: her dönemin deseni ayrı katman, seçili olan görünür (05-map.css) -->
+      <div id="mapCivTex" aria-hidden="true">
+        <div class="mct mct-babylon"></div><div class="mct mct-persia"></div><div class="mct mct-alexander"></div>
+        <div class="mct mct-parthia"></div><div class="mct mct-sasanian"></div><div class="mct mct-early_islam"></div>
+        <div class="mct mct-abbasid"></div><div class="mct mct-mongol"></div><div class="mct mct-ottoman"></div>
+      </div>
 
       <!-- Fog zones — gerçekçi beyaz bulut sisi -->
       <div class="fog-zone" id="fz1" style="left:1240px;top:114px;width:730px;height:910px;">
@@ -2416,7 +2422,7 @@
         </div>
         <div class="map-energy-badge">
           <span style="font-size:13px;">⚡</span>
-          <span class="mev" id="mapEnergyVal">5</span>
+          <span class="mev" id="mapEnergyVal">10</span>
         </div>
         <button class="map-btn-place" id="mapPlaceBtn" onclick="openMapPlaceMode()">🏛 Yerleştir</button>
       </div>
@@ -3064,5 +3070,7 @@
 <script src="js/41-difficulty-mechanics.js"></script>
 <script src="js/42-auto-hint.js"></script>
 <script src="js/43-online.js"></script>
+<script src="js/44-music.js"></script>
+<script src="js/45-map-landmarks.js"></script>
 </body>
 </html>

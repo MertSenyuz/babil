@@ -30,6 +30,8 @@ function updateEnergyUI(){
   document.querySelectorAll('#energyTxt,#energyTxt2').forEach(el=>el.textContent=`${G.energy}/${G.maxEnergy}`);
   const eb3=document.getElementById('energyBar3');
   if(eb3) eb3.style.width=pct+'%';
+  const mev=document.getElementById('mapEnergyVal');
+  if(mev) mev.textContent=G.energy;
 }
 
 function updateEnergyModal(){ const el=document.getElementById('energyTimer'); if(el) el.textContent=getEnergyTimerStr(); }

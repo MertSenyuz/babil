@@ -131,6 +131,7 @@ function toggleSfx(){
   localStorage.setItem('babil_sfx', _sfxOn?'1':'0');
   showToast(_sfxOn ? '🔊 Ses açık' : '🔇 Ses kapalı');
   updateSfxBtn();
+  if(typeof musSync==='function') musSync();   // arka plan müziği de (44-music.js)
 }
 function loadSfxPref(){
   _sfxOn = localStorage.getItem('babil_sfx') !== '0';

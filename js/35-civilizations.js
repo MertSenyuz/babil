@@ -130,6 +130,10 @@ let _fogShown = {};
 function applyMapCiv(){
   const c=G.mapCiv||0, idxs=civBuildingIdx(c), civ=CIVILIZATIONS[c];
   document.getElementById('mapInner').dataset.civ=c;
+  document.getElementById('mapScreen').dataset.civ=civ.key;   // arka plan teması (16-civilizations.css)
+  document.getElementById('mapCanvas').setAttribute('data-civ', civ.key);   // medeniyet dokusu (05-map.css)
+  renderMapTerrain();   // döneme özgü harita (20-map.js)
+  if(typeof musPlay==='function') musPlay(civ.key);   // döneme özgü müzik (44-music.js, daha sonra yüklenir)
   document.documentElement.style.setProperty('--civ', civ.color);   // @property ile yumuşak geçiş
   for(let i=1;i<=5;i++){
     const fz=document.getElementById('fz'+i), b=BUILDINGS[idxs[i]];
