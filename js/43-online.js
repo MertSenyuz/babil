@@ -78,6 +78,7 @@ const OL = {
     ol_fr_beaten:['🏆 {0} geçildi! Yeni skorun: {1}','🏆 You beat {0}! New score: {1}'],
     ol_name_taken:['Bu kullanıcı adı zaten alınmış!','This username is already taken!'],
     ol_conflict:['☁️ "{0}" adı çevrimiçi başka bir oyuncuya ait — ilerlemen yalnızca bu cihazda saklanacak.','☁️ "{0}" is taken online by another player — your progress stays on this device only.'],
+    ol_banned:['⛔ Hesabın bir yönetici tarafından engellendi.','⛔ Your account has been banned by an admin.'],
     ol_restored:['☁️ Bulut kaydın yüklendi!','☁️ Cloud save restored!'],
     ol_mlb_title:['🏆 Liderlik','🏆 Leaders'],
     ol_mlb_aria:['Liderlik','Leaderboard'],
@@ -194,9 +195,10 @@ async function olCols(sb){
     try{ await olQ(sb.from(tbl).select(cols).limit(1)); return true; }
     catch(e){ return !(e && (e.code==='42703' || e.code==='PGRST204' || /column/i.test(e.message||''))) ? null : false; }
   };
-  const users=await probe('users','last_seen,avatar'), lb=await probe('leaderboard','week_key,week_stars');
-  if(users===null || lb===null) return {users:false, lb:false};   // ağ hatası: önbelleğe alma, sonra tekrar dene
-  return OL.cols = {users, lb};
+  const users=await probe('users','last_seen,avatar'), lb=await probe('leaderboard','week_key,week_stars'),
+        role=await probe('users','role,banned');   // yönetici paneli (45-admin.js): sütunlar yoksa özellik kapalı
+  if(users===null || lb===null || role===null) return {users:false, lb:false, role:false};   // ağ hatası: önbelleğe alma, sonra tekrar dene
+  return OL.cols = {users, lb, role};
 }
 
 // ── Hesap ──
@@ -458,6 +460,28 @@ function olAfterLogin(){
   olStatus();
   olQueueSync(300);
   olStartHeartbeat();
+  olLoadRole();
+}
+
+// Buluttan rol/ban bilgisini oku. role='admin' → yönetici paneli görünür (45-admin.js).
+// banned=true → oturum kapatılır. Sütunlar yoksa (eski kurulum) sessizce atlanır.
+// NOT: Bu yalnızca arayüz kapısıdır; gerçek koruma Supabase RLS politikalarıyla sağlanır (setup.sql).
+async function olLoadRole(){
+  G.role = null;
+  if(typeof adminRefreshBtn==='function') adminRefreshBtn();
+  const u=CURRENT_USER;
+  if(!u || !olOnline()) return;
+  try{
+    const sb=await olClient(); if(!sb) return;
+    const id=await olEnsureAccount(sb, u); if(id==null) return;
+    if(!(await olCols(sb)).role) return;              // role sütunu yok → özellik kapalı
+    const rows=await olQ(sb.from('users').select('role,banned').eq('id', id).limit(1));
+    const r=rows && rows[0]; if(!r) return;
+    if(r.banned){ showToast(t('ol_banned'), 'warning'); setTimeout(()=>doLogout(), 2500); return; }
+    G.role = r.role || null;
+    u.role = G.role; saveUserData(u);
+  }catch(e){ olWarn('role', e); }
+  if(typeof adminRefreshBtn==='function') adminRefreshBtn();
 }
 
 const _olOrigDoLogout = doLogout;

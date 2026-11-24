@@ -6,7 +6,8 @@ const fs = require('fs');
 const path = require('path');
 const { JSDOM, VirtualConsole, requestInterceptor } = require('jsdom');
 
-const ROOT = path.resolve(__dirname, '..', '..');
+// Varsayılan: depo kökü. BABIL_ROOT ile başka bir derleme (ör. obfuscate edilmiş dist/) hedeflenebilir.
+const ROOT = process.env.BABIL_ROOT ? path.resolve(process.env.BABIL_ROOT) : path.resolve(__dirname, '..', '..');
 
 // localhost → diskten dosya; diğer her şey (CDN) → boş yanıt
 const MIME = {'.js':'application/javascript', '.css':'text/css', '.html':'text/html', '.mp3':'audio/mpeg', '.json':'application/json'};

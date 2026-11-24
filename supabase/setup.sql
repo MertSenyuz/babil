@@ -5,11 +5,16 @@
 -- arkadaşların çevrimiçi durumu bu sütunlar olmadan kapalı kalır.
 -- ══════════════════════════════════════════════
 
--- 1) Ek sütunlar: çevrimiçi durumu, avatar, haftalık sıralama
+-- 1) Ek sütunlar: çevrimiçi durumu, avatar, haftalık sıralama, yönetici rolü/ban
 alter table users       add column if not exists last_seen  timestamptz;
 alter table users       add column if not exists avatar     text;
+alter table users       add column if not exists role       text;           -- 'admin' → yönetici paneli (45-admin.js)
+alter table users       add column if not exists banned     boolean not null default false;
 alter table leaderboard add column if not exists week_key   text;           -- ör. '2026-W41' (ISO hafta)
 alter table leaderboard add column if not exists week_stars int not null default 0;
+
+-- Kendini yönetici yapmak için (SQL Editor'da bir kez, kendi kullanıcı adınla):
+--   update users set role = 'admin' where lower(username) = lower('KULLANICI_ADIN');
 
 -- 2) Tekillik: aynı kullanıcı adı / aynı bölüm satırı iki kez oluşmasın
 create unique index if not exists users_username_lower_uq on users (lower(username));

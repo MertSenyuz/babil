@@ -33,7 +33,7 @@ async function playLevel(g, b, l){
   await wait(20);
   const screen = ()=>g.doc.querySelector('.screen.active')?.id;
   assert.equal(screen(), 'gameScreen', `bölüm ${b}/${l} açılmadı`);
-  for(let step=0; step<400; step++){
+  for(let step=0; step<1000; step++){   // obfuscate derleme daha yavaş: bütçe geniş
     if(screen()==='resultScreen') return g.val('_lastResultWin');
     if(g.doc.getElementById('reshuffleModal')?.classList.contains('open')){ g.run('doReshuffle()'); await wait(15); continue; }
     if(g.doc.querySelector('.boost-modal.open, #boostModal.open')){ g.run('typeof boostShieldDecline==="function" && boostShieldDecline()'); await wait(15); continue; }
@@ -44,7 +44,7 @@ async function playLevel(g, b, l){
     g.run(`G.selected=null; onCellClick(${mv[0]},${mv[1]}); onCellClick(${mv[2]},${mv[3]});`);
     await wait(8);
   }
-  assert.fail(`bölüm ${b}/${l} 400 adımda bitmedi (ekran: ${screen()}, hamle: ${g.val('G.moves')})`);
+  assert.fail(`bölüm ${b}/${l} bütçe doldu, bitmedi (ekran: ${screen()}, hamle: ${g.val('G.moves')})`);
 }
 
 for(let c=0;c<9;c++){
