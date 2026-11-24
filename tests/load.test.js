@@ -30,6 +30,13 @@ test('?test olmadan test modu kapalı: yalnızca Babil açık', async()=>{
   g.close();
 });
 
+test('tüm js/css bağlantıları aynı sürüm etiketini taşır (önbellek kırıcı)', ()=>{
+  const tags = [...html.matchAll(/(?:src="js|href="css)\/[^"]+"/g)].map(m=>m[0]);
+  const vers = new Set(tags.map(x=>(x.match(/\?v=(\w+)"/)||[])[1]));
+  assert.equal(vers.size, 1, 'farklı ya da eksik ?v=: '+[...vers]);
+  assert.ok([...vers][0], "?v= etiketi yok");
+});
+
 test('bozuk localStorage oyunu çökertmez', async()=>{
   const g = await loadGame({storage:{babil_users:'{bozuk json', babil_session:'"yok"'}});
   assert.deepEqual(g.errors, []);
@@ -38,13 +45,13 @@ test('bozuk localStorage oyunu çökertmez', async()=>{
 });
 
 test('js/ klasöründeki her dosya index.html\'de numara sırasıyla yüklenir', ()=>{
-  const srcs = [...html.matchAll(/<script[^>]+src="js\/([^"]+)"/g)].map(m=>m[1]);
+  const srcs = [...html.matchAll(/<script[^>]+src="js\/([^"?]+)(?:\?[^"]*)?"/g)].map(m=>m[1]);
   assert.deepEqual([...srcs].sort(), jsFiles, 'eksik ya da fazla <script>');
   assert.deepEqual(srcs, [...srcs].sort(), 'betikler numara sırasında değil');
 });
 
 test('index.html\'deki her stil dosyası mevcut ve css/ klasöründeki hepsi bağlı', ()=>{
-  const hrefs = [...html.matchAll(/<link[^>]+href="(css\/[^"]+)"/g)].map(m=>m[1]);
+  const hrefs = [...html.matchAll(/<link[^>]+href="(css\/[^"?]+)(?:\?[^"]*)?"/g)].map(m=>m[1]);
   hrefs.forEach(h=>assert.ok(fs.existsSync(path.join(ROOT, h)), h+' yok'));
   const cssFiles = fs.readdirSync(path.join(ROOT, 'css')).map(f=>'css/'+f).sort();
   assert.deepEqual([...hrefs].sort(), cssFiles);
