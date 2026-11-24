@@ -654,8 +654,9 @@ function buildingStars(idx){ const bp=G.buildingProgress[idx]; return bp ? bp.st
 function civStars(c){ return civBuildingIdx(c).reduce((a,i)=>a+buildingStars(i),0); }
 function isBuildingComplete(idx){ const bp=G.buildingProgress[idx]; return !!bp && BUILDINGS[idx].levels.every((_,l)=>(bp.stars[l]||0)>0); }
 function isCivComplete(c){ return civBuildingIdx(c).every(isBuildingComplete); }
-// Test modu: sadece yerelde (localhost veya dosyadan açınca) ?test ile tüm medeniyet ve yapılar açık görünür (kayıt değişmez)
-const DEV_UNLOCK_ALL = (location.protocol==='file:' || /^(localhost|127\.0\.0\.1)$/.test(location.hostname)) && new URLSearchParams(location.search).has('test');
+// Test modu: adrese ?test eklenince (yerelde ve yayındaki sitede) tüm medeniyet ve yapılar açık görünür.
+// Test oyuncuları için: https://mertsenyuz.github.io/babil/?test — normal linkte ilerleme her zamanki gibi kilitlidir.
+const DEV_UNLOCK_ALL = new URLSearchParams(location.search).has('test');
 function isCivUnlocked(c){ return DEV_UNLOCK_ALL || c<=0 || isCivComplete(c-1); }
 // Bir yapı, unlockBuilding'deki yapının tüm bölümleri (en az 1 yıldızla) bitince açılır.
 // Eski kayıtlar: yıldız sistemiyle açılıp oynanmaya başlanmış yapı açık kalır (ilerleme kaybolmasın).

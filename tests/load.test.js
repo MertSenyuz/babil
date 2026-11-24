@@ -23,6 +23,13 @@ test('oyun hatasız yüklenir (?test modu) ve tüm medeniyetler açılır', asyn
   g.close();
 });
 
+test('?test olmadan test modu kapalı: yalnızca Babil açık', async()=>{
+  const g = await loadGame();
+  assert.equal(g.run('DEV_UNLOCK_ALL'), false);
+  assert.equal(g.run('isCivUnlocked(1)'), false);
+  g.close();
+});
+
 test('bozuk localStorage oyunu çökertmez', async()=>{
   const g = await loadGame({storage:{babil_users:'{bozuk json', babil_session:'"yok"'}});
   assert.deepEqual(g.errors, []);
