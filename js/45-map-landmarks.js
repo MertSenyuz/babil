@@ -35,9 +35,9 @@ const TERR_LANDMARKS = (()=>{
   const wins = (x0,x1,y,n,f='#2a1a10',w=6,h=10)=>{ let s=''; const st=n>1?(x1-x0)/(n-1):0; for(let i=0;i<n;i++) s+=R(x0+i*st-w/2,y,w,h,f); return s; };
   const minaret = (cx,y,h,P,cap)=>R(cx-6,y-h,12,h,P.t)+R(cx+2,y-h,4,h,P.wd)+R(cx-9,y-Math.round(h*.65),18,4,P.wd)+R(cx-9,y-h+12,18,4,P.wd)
     +`<polygon points="${cx-7},${y-h} ${cx},${y-h-24} ${cx+7},${y-h}" fill="${cap}"/>`+R(cx-1,y-h-30,2,6,'#f5c842');
-  const flag = (x,y,col,h=44)=>R(x,y-h,2,h,'#4a3828')+R(x+2,y-h,18,11,col)+R(x+2,y-h+8,18,3,'#000',.2);
-  const flame = (cx,y,s=1)=>`<circle cx="${cx}" cy="${y-14*s}" r="${30*s}" fill="url(#lavaGlow)" opacity=".75"/>`
-    +`<polygon points="${cx-9*s},${y} ${cx-3*s},${y-22*s} ${cx},${y-32*s} ${cx+4*s},${y-20*s} ${cx+9*s},${y}" fill="#ff6a10"/><polygon points="${cx-5*s},${y} ${cx},${y-19*s} ${cx+5*s},${y}" fill="#ffe070"/>`;
+  const flag = (x,y,col,h=44)=>R(x,y-h,2,h,'#4a3828')+`<g class="an-fg">${R(x+2,y-h,18,11,col)+R(x+2,y-h+8,18,3,'#000',.2)}</g>`;
+  const flame = (cx,y,s=1)=>`<circle class="an-glow" cx="${cx}" cy="${y-14*s}" r="${30*s}" fill="url(#lavaGlow)" opacity=".75"/>`
+    +`<g class="an-fl"><polygon points="${cx-9*s},${y} ${cx-3*s},${y-22*s} ${cx},${y-32*s} ${cx+4*s},${y-20*s} ${cx+9*s},${y}" fill="#ff6a10"/><polygon points="${cx-5*s},${y} ${cx},${y-19*s} ${cx+5*s},${y}" fill="#ffe070"/></g>`;
   const tent = (cx,y,w,col)=>`<polygon points="${cx-w/2},${y} ${cx},${y-w*.7} ${cx+w/2},${y}" fill="${col}"/><polygon points="${cx},${y-w*.7} ${cx+w/2},${y} ${cx},${y}" fill="#000" opacity=".2"/>`
     +`<polygon points="${cx-6},${y} ${cx},${y-16} ${cx+6},${y}" fill="#2a1a10"/>`+R(cx-1,y-w*.7-10,2,10,'#4a3828');
   const water = (x,y,w,h)=>R(x-6,y-6,w+12,h+12,'#c8b070')+R(x,y,w,h,'#1a4a7a')+R(x+4,y+4,w-8,h-8,'#2a6aaa')+R(x+10,y+8,w*.35,3,'#6aaae0',.7)+R(x+w*.5,y+h-10,w*.3,3,'#6aaae0',.6);
@@ -46,7 +46,7 @@ const TERR_LANDMARKS = (()=>{
     +R(x+10,y-27,6,12,col)+R(x+12,y-30,10,6,col)+R(x-16,y-18,4,9,'#3a2a1a')+R(x+10,y-29,3,8,'#3a2a1a')
     +(rider?R(x-4,y-30,8,12,rider)+R(x-3,y-36,6,6,'#d8a878')+R(x-4,y-38,8,3,'#3a2a1a'):'');
   const pave = (w,h,f)=>R(-w/2,-h/2,w,h,'#000',.18)+R(-w/2,-h/2-4,w,h,f)+R(-w/2,-h/2-4,w,3,'#fff',.2);
-  const smoke = (x,y)=>`<circle cx="${x}" cy="${y-8}" r="7" fill="#9a9a9a" opacity=".55"/><circle cx="${x+6}" cy="${y-22}" r="9" fill="#aaa" opacity=".45"/><circle cx="${x+2}" cy="${y-38}" r="11" fill="#bbb" opacity=".35"/>`;
+  const smoke = (x,y)=>`<g><circle class="an-smk" cx="${x}" cy="${y-8}" r="7" fill="#9a9a9a" opacity=".55"/><circle class="an-smk" cx="${x+6}" cy="${y-22}" r="9" fill="#aaa" opacity=".45"/><circle class="an-smk" cx="${x+2}" cy="${y-38}" r="11" fill="#bbb" opacity=".35"/></g>`;
   const crescent = (cx,cy,r,f='#f5c842',bg)=>`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${f}"/><circle cx="${cx+r*.45}" cy="${cy-r*.2}" r="${r*.8}" fill="${bg}"/>`;
 
   // ── Yapılar: [civ][pin sırası] = (P, a) => svg ──

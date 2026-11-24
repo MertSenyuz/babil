@@ -1,0 +1,74 @@
+/* ══════════════════════════════════════════════
+   HARİTA ANİMASYONLARI — #mapTerrainSvg
+   Medeniyet haritaları (20-map.js / 45-map-landmarks.js) sınıfları: an-fl alev, an-glow parıltı, an-fg bayrak,
+   an-wv dalga, an-flow su akışı, an-sway sallanma, an-ride/an-gal atlı, an-smk duman, an-sand kum fırtınası, an-bird kuşlar.
+   Babil (index.html, el yapımı): işaretlemeye dokunmadan nitelik seçicileriyle.
+   Performans: yalnızca transform/opacity; steps() → piksel-art havası + daha seyrek yeniden çizim.
+   Harita sürüklenirken (map-moving) ve "hareketi azalt" tercihinde duraklar.
+   ══════════════════════════════════════════════ */
+#mapTerrainSvg .an-fl,#mapTerrainSvg .an-fg,#mapTerrainSvg .an-sway,#mapTerrainSvg .an-glow,#mapTerrainSvg .an-smk,#mapTerrainSvg .an-gal{
+  transform-box:fill-box;}
+
+/* Alev: titreme (taban sabit) */
+#mapTerrainSvg .an-fl{transform-origin:50% 100%;animation:mapFlicker .9s steps(4) infinite;}
+@keyframes mapFlicker{
+  0%,100%{transform:scaleY(1) scaleX(1);opacity:1;}
+  25%{transform:scaleY(1.1) scaleX(.9);opacity:.9;}
+  50%{transform:scaleY(.95) scaleX(1.05);opacity:1;}
+  75%{transform:scaleY(1.05) scaleX(.95);opacity:.85;}}
+/* Ateş parıltısı: nefes alır gibi */
+#mapTerrainSvg .an-glow{transform-origin:50% 50%;animation:mapGlow 2.4s steps(6) infinite;}
+@keyframes mapGlow{0%,100%{transform:scale(1);opacity:.75;}50%{transform:scale(1.12);opacity:1;}}
+
+/* Bayrak: direğe bağlı kenardan sallanır */
+#mapTerrainSvg .an-fg{transform-origin:0 50%;animation:mapWave 1.6s steps(3) infinite;}
+@keyframes mapWave{0%,100%{transform:rotate(-3deg) skewY(-2deg);}50%{transform:rotate(3deg) skewY(2deg);}}
+
+/* Deniz dalgası: yana kayıp söner */
+#mapTerrainSvg .an-wv{animation:mapRipple 4s steps(8) infinite;}
+@keyframes mapRipple{0%{transform:translateX(-6px);opacity:0;}30%{opacity:.9;}70%{opacity:.9;}100%{transform:translateX(10px);opacity:0;}}
+
+/* Nehir / boğaz akışı: kesik parıltı çizgileri akış yönünde kayar */
+#mapTerrainSvg .an-flow{animation:mapFlow 2.4s steps(8) infinite;}
+@keyframes mapFlow{to{stroke-dashoffset:-80;}}
+
+/* Rüzgârda sallanma (ot, palmiye) — taban sabit */
+#mapTerrainSvg .an-sway{transform-origin:50% 100%;animation:mapSway 2.8s steps(4) infinite;}
+@keyframes mapSway{0%,100%{transform:rotate(-2.5deg);}50%{transform:rotate(2.5deg);}}
+
+/* Atlı: sağa doğru koşup belirir/söner; gövde dörtnala sallanır */
+#mapTerrainSvg .an-ride{animation:mapRide 6s linear infinite;}
+@keyframes mapRide{0%{transform:translateX(-40px);opacity:0;}12%{opacity:1;}85%{opacity:1;}100%{transform:translateX(80px);opacity:0;}}
+#mapTerrainSvg .an-gal{transform-origin:50% 100%;animation:mapGallop .4s steps(2) infinite;}
+@keyframes mapGallop{0%,100%{transform:translateY(0);}50%{transform:translateY(-2px);}}
+
+/* Duman: yükselip dağılır */
+#mapTerrainSvg .an-smk{transform-origin:50% 50%;animation:mapSmoke 3.6s steps(9) infinite;}
+#mapTerrainSvg .an-smk:nth-of-type(2){animation-delay:-1.2s;}
+#mapTerrainSvg .an-smk:nth-of-type(3){animation-delay:-2.4s;}
+@keyframes mapSmoke{0%{transform:translateY(10px) scale(.7);opacity:0;}25%{opacity:.6;}100%{transform:translateY(-26px) scale(1.3);opacity:0;}}
+
+/* Kum fırtınası: toz parçacıkları yavaşça sağa kayar */
+#mapTerrainSvg .an-sand{animation:mapSand 14s linear infinite;}
+#mapTerrainSvg .an-sand+.an-sand{animation-delay:-7s;}
+@keyframes mapSand{0%{transform:translateX(-160px);opacity:0;}15%{opacity:.7;}85%{opacity:.7;}100%{transform:translateX(160px);opacity:0;}}
+
+/* Kuşlar: uzaktan süzülerek geçer, kanat çırpar */
+#mapTerrainSvg .an-bird{animation:mapBird 26s linear infinite;}
+@keyframes mapBird{0%{transform:translate(-300px,40px);opacity:0;}8%{opacity:1;}92%{opacity:1;}100%{transform:translate(2300px,-60px);opacity:0;}}
+#mapTerrainSvg .an-bird path{animation:mapFlap .5s steps(2) infinite;transform-box:fill-box;transform-origin:50% 50%;}
+@keyframes mapFlap{50%{transform:scaleY(.4);}}
+
+/* ── Babil (el yapımı harita): Ateş Dağı, kule ışığı, nehir parıltıları ── */
+#terrBase circle[fill="url(#lavaGlow)"]{transform-box:fill-box;transform-origin:50% 50%;animation:mapGlow 2.4s steps(6) infinite;}
+#terrBase rect[fill="#ffc040"],#terrBase rect[fill="#e05a20"],#terrBase rect[fill="#fff6c8"]{transform-box:fill-box;transform-origin:50% 100%;animation:mapFlicker .9s steps(4) infinite;}
+#terrBase circle[fill="#6a6258"]{transform-box:fill-box;transform-origin:50% 50%;animation:mapSmoke 3.6s steps(9) infinite;}
+#terrBase circle[fill="#6a6258"]:nth-child(2n){animation-delay:-1.8s;}
+#terrBase rect[fill="#bfe0ff"]{animation:mapShimmer 2.6s steps(4) infinite;}
+#terrBase rect[fill="#bfe0ff"]:nth-child(3n){animation-delay:-.9s;}
+#terrBase rect[fill="#bfe0ff"]:nth-child(3n+1){animation-delay:-1.8s;}
+@keyframes mapShimmer{0%,100%{opacity:.15;}50%{opacity:.75;}}
+
+/* Kaydırırken ve hareketi azalt tercihinde dur */
+#mapCanvas.map-moving #mapTerrainSvg *{animation-play-state:paused !important;}
+@media (prefers-reduced-motion:reduce){#mapTerrainSvg *{animation:none !important;}}

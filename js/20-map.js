@@ -278,7 +278,7 @@ const TR_SPRITES = (()=>{
     <rect x="22" y="-62" width="6" height="6" fill="#8a7656"/><rect x="34" y="-62" width="6" height="6" fill="#8a7656"/>
     <rect x="-18" y="-40" width="6" height="6" fill="#9a8662"/><rect x="-6" y="-40" width="6" height="6" fill="#9a8662"/><rect x="6" y="-40" width="6" height="6" fill="#9a8662"/>
     <rect x="-7" y="-18" width="14" height="18" fill="#3a2a1a"/><rect x="-33" y="-46" width="4" height="8" fill="#3a2a1a"/><rect x="29" y="-46" width="4" height="8" fill="#2a1a10"/>
-    <rect x="-32" y="-82" width="2" height="20" fill="#4a3828"/><rect x="-30" y="-82" width="12" height="7" fill="currentColor"/></g>
+    <rect x="-32" y="-82" width="2" height="20" fill="#4a3828"/><rect class="an-fg" x="-30" y="-82" width="12" height="7" fill="currentColor"/></g>
   <g id="ctTemple">${sh(46,7)}<rect x="-42" y="-8" width="84" height="8" fill="#c8c0b0"/><rect x="-38" y="-12" width="76" height="4" fill="#e0d8c8"/>
     ${[-32,-14,4,22].map(x=>`<rect x="${x}" y="-46" width="10" height="34" fill="#ece6da"/><rect x="${x+7}" y="-46" width="3" height="34" fill="#c8c0b0"/>`).join('')}
     <rect x="-38" y="-52" width="76" height="6" fill="#e0d8c8"/><rect x="-38" y="-50" width="76" height="2" fill="currentColor"/><polygon points="-40,-52 0,-70 40,-52" fill="#ece6da"/><polygon points="-28,-54 0,-65 28,-54" fill="#c8c0b0"/></g>
@@ -288,14 +288,14 @@ const TR_SPRITES = (()=>{
   <g id="ctShip"><rect x="-26" y="3" width="52" height="3" fill="#bfe0ff" opacity=".5"/><polygon points="-30,-10 30,-10 22,2 -22,2" fill="#6a4a18"/>
     <rect x="-30" y="-12" width="60" height="3" fill="#8a6a2a"/><rect x="-1" y="-52" width="3" height="42" fill="#4a3828"/>
     <polygon points="3,-50 22,-28 3,-22" fill="#f0ead8"/><rect x="3" y="-38" width="10" height="4" fill="currentColor"/><polygon points="-2,-46 -18,-24 -2,-20" fill="#d8d0b8"/></g>
-  <g id="ctLight"><circle cy="-76" r="26" fill="url(#lavaGlow)" opacity=".6"/>${sh(18,4)}<rect x="-14" y="-24" width="28" height="24" fill="#d8d0c0"/>
+  <g id="ctLight"><circle class="an-glow" cy="-76" r="26" fill="url(#lavaGlow)" opacity=".6"/>${sh(18,4)}<rect x="-14" y="-24" width="28" height="24" fill="#d8d0c0"/>
     <rect x="-10" y="-52" width="20" height="28" fill="#e8e2d6"/><rect x="-7" y="-70" width="14" height="18" fill="#d8d0c0"/><rect x="5" y="-52" width="5" height="28" fill="#c8c0b0"/>
-    <rect x="-5" y="-80" width="10" height="10" fill="#ff9a30"/><rect x="-2" y="-78" width="4" height="6" fill="#ffe070"/></g>
+    <g class="an-fl"><rect x="-5" y="-80" width="10" height="10" fill="#ff9a30"/><rect x="-2" y="-78" width="4" height="6" fill="#ffe070"/></g></g>
   <g id="ctDome">${sh(26,6)}<rect x="-20" y="-24" width="40" height="24" fill="#b89a6a"/><rect x="8" y="-24" width="12" height="24" fill="#9a7e52"/>
     ${dome(-16,16,-24,'#c8aa78')}<rect x="-20" y="-24" width="40" height="3" fill="currentColor"/><rect x="-1" y="-46" width="2" height="6" fill="#7a5a2a"/><rect x="-5" y="-12" width="8" height="12" fill="#3a2a1a"/></g>
-  <g id="ctFire"><circle cy="-46" r="36" fill="url(#lavaGlow)" opacity=".7"/>${sh(28,6)}<rect x="-24" y="-30" width="48" height="30" fill="#b8a07a"/><rect x="10" y="-30" width="14" height="30" fill="#96805c"/>
+  <g id="ctFire"><circle class="an-glow" cy="-46" r="36" fill="url(#lavaGlow)" opacity=".7"/>${sh(28,6)}<rect x="-24" y="-30" width="48" height="30" fill="#b8a07a"/><rect x="10" y="-30" width="14" height="30" fill="#96805c"/>
     <path d="M-16,0 V-14 A6,6 0 0 1 -4,-14 V0Z" fill="#3a2a1a"/><path d="M4,0 V-14 A6,6 0 0 1 16,-14 V0Z" fill="#2a1a10"/>
-    <path d="M-26,-30 A26,14 0 0 1 26,-30Z" fill="#c8b088"/><polygon points="-7,-43 0,-64 7,-43" fill="#ff9a30"/><polygon points="-3,-43 0,-54 3,-43" fill="#ffe070"/></g>
+    <path d="M-26,-30 A26,14 0 0 1 26,-30Z" fill="#c8b088"/><g class="an-fl"><polygon points="-7,-43 0,-64 7,-43" fill="#ff9a30"/><polygon points="-3,-43 0,-54 3,-43" fill="#ffe070"/></g></g>
   <g id="ctArch">${sh(58,8)}<rect x="-54" y="-66" width="108" height="66" fill="#b8a07a"/><rect x="30" y="-66" width="24" height="66" fill="#9a845e"/>
     <path d="M-22,0 V-30 A22,26 0 0 1 22,-30 V0Z" fill="#3a2a1a"/>
     ${[-48,-38,32,42].map(x=>`<rect x="${x}" y="-56" width="6" height="12" fill="#3a2a1a"/><rect x="${x}" y="-32" width="6" height="12" fill="#3a2a1a"/>`).join('')}</g>
@@ -325,7 +325,7 @@ const TR_SPRITES = (()=>{
     <path d="M-22,-16 Q0,-38 22,-16Z" fill="#d8ceb8"/><rect x="-20" y="-12" width="40" height="3" fill="currentColor"/><rect x="-5" y="-12" width="10" height="12" fill="#a83a2a"/><rect x="-3" y="-30" width="6" height="4" fill="#6a5040"/></g>
   <g id="ctRuin"><ellipse cy="1" rx="24" ry="5" fill="#000" opacity=".22"/><rect x="-20" y="-18" width="10" height="18" fill="#8a7a62"/><rect x="-20" y="-24" width="6" height="6" fill="#8a7a62"/>
     <rect x="-10" y="-10" width="16" height="10" fill="#7a6a52"/><rect x="8" y="-14" width="10" height="14" fill="#8a7a62"/><rect x="-6" y="-4" width="10" height="4" fill="#2a2420"/></g>
-  <g id="ctGrass"><rect x="-4" y="-8" width="2" height="8" fill="#6a7a28"/><rect x="0" y="-11" width="2" height="11" fill="#7a8a30"/><rect x="4" y="-7" width="2" height="7" fill="#5a6a20"/></g>
+  <g id="ctGrass"><g class="an-sway"><rect x="-4" y="-8" width="2" height="8" fill="#6a7a28"/><rect x="0" y="-11" width="2" height="11" fill="#7a8a30"/><rect x="4" y="-7" width="2" height="7" fill="#5a6a20"/></g></g>
   <pattern id="trMarble" width="80" height="80" patternUnits="userSpaceOnUse">
     <rect x="0" y="0" width="40" height="40" fill="#fff" opacity=".12"/><rect x="40" y="40" width="40" height="40" fill="#fff" opacity=".12"/>
     <rect x="0" y="39" width="80" height="2" fill="#8a8070" opacity=".18"/><rect x="39" y="0" width="2" height="80" fill="#8a8070" opacity=".18"/></pattern>
@@ -346,11 +346,11 @@ const TR_SPRITES = (()=>{
     <rect x="-4" y="-30" width="8" height="26" fill="#d8b880"/><rect x="1" y="-30" width="3" height="26" fill="#b0905a"/><polygon points="-4,-30 0,-36 4,-30" fill="#d8b880"/><rect x="8" y="-6" width="18" height="6" fill="#c8a870"/></g>
   <g id="ctRider"><ellipse cx="0" cy="1" rx="18" ry="4" fill="#000" opacity=".25"/>
     <circle cx="-24" cy="-5" r="6" fill="#e0c890" opacity=".55"/><circle cx="-33" cy="-8" r="5" fill="#e0c890" opacity=".4"/><circle cx="-41" cy="-4" r="4" fill="#e0c890" opacity=".28"/>
-    <polygon points="-11,-10 -20,-2 -17,0 -7,-9" fill="#5a3418"/><polygon points="7,-10 17,-3 19,-6 10,-12" fill="#5a3418"/>
+    <g class="an-gal"><polygon points="-11,-10 -20,-2 -17,0 -7,-9" fill="#5a3418"/><polygon points="7,-10 17,-3 19,-6 10,-12" fill="#5a3418"/>
     <rect x="-13" y="-19" width="24" height="10" fill="#7a4a2a"/><rect x="8" y="-26" width="6" height="11" fill="#7a4a2a"/><rect x="10" y="-29" width="11" height="5" fill="#7a4a2a"/>
     <rect x="7" y="-27" width="3" height="9" fill="#2a1a0a"/><polygon points="-13,-18 -22,-13 -14,-13" fill="#2a1a0a"/>
     <rect x="-4" y="-31" width="8" height="12" fill="currentColor"/><rect x="-3" y="-37" width="6" height="6" fill="#d8a878"/><rect x="-4" y="-39" width="8" height="3" fill="#3a2a1a"/>
-    <path d="M6,-40 A10,12 0 0 1 6,-18" stroke="#4a3020" stroke-width="2" fill="none"/></g>
+    <path d="M6,-40 A10,12 0 0 1 6,-18" stroke="#4a3020" stroke-width="2" fill="none"/></g></g>
   <g id="ctHorse"><ellipse cx="0" cy="1" rx="14" ry="3" fill="#000" opacity=".22"/>${[-11,-6,4,8].map(x=>`<rect x="${x}" y="-8" width="3" height="8" fill="#6a4020"/>`).join('')}
     <rect x="-12" y="-17" width="24" height="9" fill="#8a5a30"/><rect x="10" y="-15" width="5" height="10" fill="#8a5a30"/><rect x="12" y="-7" width="6" height="5" fill="#8a5a30"/><polygon points="-12,-16 -17,-8 -12,-10" fill="#3a2a1a"/></g>
   <g id="ctDune"><ellipse cx="4" cy="2" rx="44" ry="6" fill="#000" opacity=".12"/><path d="M-44,0 Q-14,-30 34,-8 Q40,-4 44,0Z" fill="#e8c878"/><path d="M34,-8 Q40,-4 44,0 L-44,0 Q-6,-10 34,-8Z" fill="#b8904a"/>
@@ -368,7 +368,7 @@ const TR_SPRITES = (()=>{
     <rect x="4" y="-21" width="6" height="4" fill="#b0bea0"/><rect x="-12" y="-16" width="4" height="3" fill="#4a5a3a"/></g>
   <g id="ctRose"><ellipse cx="1" cy="1" rx="9" ry="3" fill="#000" opacity=".25"/><rect x="-8" y="-12" width="16" height="12" fill="#2a5a18"/><rect x="-6" y="-15" width="12" height="4" fill="#3a7020"/>
     <rect x="-6" y="-12" width="4" height="4" fill="#d8304a"/><rect x="2" y="-14" width="4" height="4" fill="#f06a8a"/><rect x="-1" y="-7" width="4" height="4" fill="#d8304a"/><rect x="4" y="-6" width="3" height="3" fill="#f06a8a"/></g>
-  <g id="ctFlag"><rect x="-1" y="-34" width="2" height="34" fill="#4a3828"/><rect x="1" y="-34" width="14" height="9" fill="currentColor"/><rect x="1" y="-27" width="14" height="2" fill="#000" opacity=".2"/></g>`;
+  <g id="ctFlag"><rect x="-1" y="-34" width="2" height="34" fill="#4a3828"/><g class="an-fg"><rect x="1" y="-34" width="14" height="9" fill="currentColor"/><rect x="1" y="-27" width="14" height="2" fill="#000" opacity=".2"/></g></g>`;
 })();
 
 // Harita kurucu: zemin, lekeler, su, yol ve yapıları toplar; yapılar pinlerin/nehirlerin üstüne gelmez
@@ -399,19 +399,21 @@ function terrBuild(c, draw){
       out.push(`<path d="${b.d}" fill="${rim}" stroke="${rim}" stroke-width="28" stroke-linejoin="miter" clip-path="url(#${clip})"/><path d="${b.d}" fill="${fill}"/>`); return b;
     },
     // Boğaz / geniş su yolu: deniz desenli, kumsal kenarlı (köprüler için nehir sayılır)
-    strait(pts, w){ rivers.push({pts, w}); m.line(pts, w+28, '#d8c080'); m.line(pts, w+8, '#123a64'); m.line(pts, w, 'url(#oceanPat)'); m.block(pts, w/2+30); },
+    strait(pts, w){ rivers.push({pts, w}); m.line(pts, w+28, '#d8c080'); m.line(pts, w+8, '#123a64'); m.line(pts, w, 'url(#oceanPat)');
+      [-.25,.2].forEach(k=>m.out.push(`<path d="${terrStairs(pts.map(([x,y])=>[x+w*k,y]))}" fill="none" stroke="#bfe0ff" stroke-width="3" class="an-flow" stroke-dasharray="16 64" opacity=".55"/>`));
+      m.block(pts, w/2+30); },
     // Su üstüne dalga kıvrımları (kara ve göller dışı)
     waves(n, box=m.box(0,0,2000,2000)){
       for(let i=0, t=0; i<n && t<n*20; t++){ const x = box.x0+r()*(box.x1-box.x0), y = box.y0+r()*(box.y1-box.y0);
-        if(m.land.has(x,y) && !wet.some(b=>b.has(x,y))) continue; m.flat('ctWave', x, y); i++; }
+        if(m.land.has(x,y) && !wet.some(b=>b.has(x,y))) continue; m.flat('ctWave', x, y, 'an-wv'); i++; }
     },
     line(pts, w, col, extra=''){
       out.push(`<path d="${terrStairs(pts)}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linecap="square" clip-path="url(#${clip})" ${extra}/>`);
     },
     block(pts, d){ terrAlong(pts, 20).forEach(([x,y])=>keep.push({x, y, d})); },
     river(pts, w=56){ rivers.push({pts, w}); m.line(pts, w+16, '#d8c080'); m.line(pts, w, '#1a4a7a'); m.line(pts, w-14, '#2a6aaa');
-      m.line(pts, 4, '#6aaae0', 'stroke-dasharray="14 26" opacity=".7"'); m.block(pts, w/2+30); },
-    canal(pts){ m.line(pts, 22, '#c8b070'); m.line(pts, 12, '#2a6aaa'); m.block(pts, 32); },
+      m.line(pts, 4, '#6aaae0', 'class="an-flow" stroke-dasharray="14 26" opacity=".7"'); m.block(pts, w/2+30); },
+    canal(pts){ m.line(pts, 22, '#c8b070'); m.line(pts, 12, '#2a6aaa'); m.line(pts, 3, '#6aaae0', 'class="an-flow" stroke-dasharray="10 30" opacity=".6"'); m.block(pts, 32); },
     road(pts, w=18, col='#c8a868', edge='#8a6a38'){ m.line(pts, w+8, edge); m.line(pts, w, col); m.block(pts, w/2+26); m.bridges(pts, w); },
     // Yol nehri kestiği yerde tahta köprü
     bridges(pts, w){
@@ -445,7 +447,9 @@ function terrBuild(c, draw){
       }
     },
     wall(pts, w=22){ m.line(pts, w+6, '#5a4a30'); m.line(pts, w, '#b8986a'); m.line(pts, 8, '#d8c08a', 'stroke-dasharray="10 10"'); m.block(pts, w/2+28); },
-    flat(id, x, y){ out.push(`<use href="#${id}" x="${Math.round(x)}" y="${Math.round(y)}"/>`); },
+    flat(id, x, y, cls){ out.push(`<use href="#${id}" x="${Math.round(x)}" y="${Math.round(y)}"${cls?` class="${cls}" style="animation-delay:-${(r()*4).toFixed(1)}s"`:''}/>`); },
+    // Animasyonlu sarmalama: bu id'lerin her örneği <g class> içine, farklı fazla (ör. palmiye sallanması)
+    wrap:{ctRider:'an-ride'},
     free:(x, y, d)=>m.isLand(x,y) && keep.every(k=>Math.hypot(k.x-x, k.y-y) >= Math.max(k.d, d)),
     put(id, x, y, s=1, d=50){ spr.push({id, x:Math.round(x), y:Math.round(y), s}); keep.push({x, y, d}); },
     try(id, x, y, s=1, d=60){ if(m.free(x, y, d)){ m.put(id, x, y, s, d); return true; } return false; },
@@ -485,7 +489,8 @@ function terrBuild(c, draw){
   const lms = typeof TERR_LANDMARKS!=='undefined' && TERR_LANDMARKS[c], pal = typeof TL_PAL!=='undefined' && TL_PAL[c];
   if(lms) lms.forEach((f,k)=>{ const p = PIN_POS[k]; if(p) spr.push({svg:f(pal, CIVILIZATIONS[c]?.color || '#f5c842'), x:p.x, y:p.y+70}); });
   spr.sort((a,b)=>a.y-b.y);
-  return out.join('') + spr.map(o=>o.svg ? `<g class="terr-lm" transform="translate(${o.x} ${o.y}) scale(1.4)">${o.svg}</g>` : `<use href="#${o.id}" transform="translate(${o.x} ${o.y})${o.s!==1?` scale(${o.s.toFixed(2)})`:''}"/>`).join('');
+  const over = m.over || '';
+  return out.join('') + spr.map(o=>o.svg ? `<g class="terr-lm" transform="translate(${o.x} ${o.y}) scale(1.4)">${o.svg}</g>` : (u=>m.wrap[o.id] ? `<g class="${m.wrap[o.id]}" style="animation-delay:-${(r()*6).toFixed(1)}s">${u}</g>` : u)(`<use href="#${o.id}" transform="translate(${o.x} ${o.y})${o.s!==1?` scale(${o.s.toFixed(2)})`:''}"/>`)).join('') + over;
 }
 
 const TERR_MAPS = {
@@ -607,6 +612,7 @@ const TERR_MAPS = {
       const cx = 220+m.r()*1560, cy = 220+m.r()*1560, rx = 140+m.r()*120, ry = 30+m.r()*20;
       m.patch(cx+10, cy+22, rx*.9, ry*.7, '#c09848', .3); m.patch(cx, cy, rx, ry, '#ecc878', .3);
     }
+    m.wrap.sPalm = 'an-sway';
     const oases = [[600,1000,110,80],[1460,1540,120,90],[1500,300,90,70],[260,500,90,70],[1700,860,80,60]];
     oases.forEach(([x,y,rx,ry])=>{ m.patch(x, y, rx+110, ry+90, '#a8a048', .3); m.water(x, y, rx, ry, '#5a8a2a', .2, 'url(#trOasis)'); });
     oases.forEach(([x,y,rx])=>m.scatter('sPalm', 18, m.near(x, y, rx+150), 28));
@@ -627,6 +633,8 @@ const TERR_MAPS = {
     m.scatter(['sPalm','sPalm','sRock'], 50, m.box(150,150,1850,1850), 40);
     m.scatter('sRock', 40, m.box(150,150,1850,1850), 30);
     m.waves(60);
+    // Kum fırtınası: iki kat toz parçacığı (yarım faz kayık) — yapıların üstünde süzülür
+    m.over = [0,1].map(()=>`<g class="an-sand">${Array.from({length:90}, ()=>`<rect x="${Math.round(100+m.r()*1800)}" y="${Math.round(100+m.r()*1800)}" width="${m.r()<.3?6:3}" height="3" fill="#f8e8b8" opacity=".8"/>`).join('')}</g>`).join('');
   },
   // Abbasi: yuvarlak Bağdat surları, Dicle, pazar, Bilgelik Evi
   6: m=>{
@@ -663,6 +671,7 @@ const TERR_MAPS = {
     m.groves(['sPalm','sTree2','sTree'], 8, 12, 120);
     m.scatter(['sTree','sTree2','sPalm'], 110, m.box(120,120,1880,1880), 34);
     m.scatter('ctDomeB', 6, m.box(200,200,1800,1800), 80);
+    [[880,780],[1120,780],[880,1060],[1120,1060]].forEach(([x,y])=>m.try('ctFlag', x, y, 1.2, 24));
     m.waves(50);
   },
   // Moğol: bozkır, yurt çadırları, at izleri, harabeler
@@ -685,6 +694,8 @@ const TERR_MAPS = {
     [[900,600],[1500,1100],[500,1250],[1100,1650]].forEach(([x,y])=>{ m.scatter('ctHorse', 7, m.near(x,y,150), 28); m.scatter('ctRider', 2, m.near(x,y,180), 40); });
     m.scatter('ctGrass', 240, m.box(120,120,1880,1880), 22);
     m.waves(50);
+    m.over = [[300,-11],[700,-4],[1150,-18]].map(([y,d])=>`<g class="an-bird" style="animation-delay:${d}s">${[[0,0],[22,10],[-18,12],[40,22],[8,26]].map(([x,yy])=>
+      `<path d="M${x-6},${y+yy} l6,5 l6,-5" stroke="#2a2a2a" stroke-width="2.5" fill="none"/>`).join('')}</g>`).join('');
   },
   // Osmanlı: surlar, cami kubbeleri, çarşı, servi ağaçları
   8: m=>{
@@ -707,7 +718,7 @@ const TERR_MAPS = {
     m.groves(['sPine','sTree','sTree2'], 9, 14, 130);
     m.scatter(['sPine','sPine','sTree','sTree2'], 130, m.box(120,120,1880,1880), 32);
     m.scatter('sPalm', 30, m.box(1400,80,1600,1900), 32);
-    m.waves(70); m.flat('ctWave', 1300, 300); m.flat('ctWave', 1320, 1100); m.flat('ctWave', 1330, 1500);
+    m.waves(70); m.flat('ctWave', 1300, 300, 'an-wv'); m.flat('ctWave', 1320, 1100, 'an-wv'); m.flat('ctWave', 1330, 1500, 'an-wv');
   },
 };
 
